@@ -524,7 +524,7 @@ export function Dashboard({ onBack, memberId }) {
             ←
           </button>
           <div className="topbar-brand">
-            <span className="brand-title">P.O.S.</span>
+            <span className="brand-title">C.O.S.</span>
             <span className="brand-subtitle">Dashboard</span>
           </div>
         </div>

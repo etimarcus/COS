@@ -30,14 +30,14 @@ export function Auth() {
     <div className="auth-container">
       <div className="auth-box">
         <div className="auth-header">
-          <div className="auth-logo">P.O.S.</div>
+          <div className="auth-logo">C.O.S.</div>
           <h1>Welcome</h1>
-          <p>People Operating System</p>
+          <p>Cell Operating System</p>
         </div>
 
         <div className="auth-content">
           <p className="auth-description">
-            Sign in with your Google account to access the People Operating System.
+            Sign in with your Google account to access the Cell Operating System.
           </p>
 
           {error && <div className="auth-error">{error}</div>}

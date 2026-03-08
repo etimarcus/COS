@@ -1,5 +1,5 @@
 /**
- * P.O.S. — People Operating System
+ * C.O.S. — Cell Operating System
  * Main application with quadrant layout
  */
 
