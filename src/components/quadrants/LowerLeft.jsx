@@ -155,11 +155,6 @@ export function LowerLeft({ onNavigate, onShowInfo, onExpand, expanded, userId }
       <span className="quadrant-label" onClick={(e) => { e.stopPropagation(); onExpand?.(); }}>WE</span>
 
       <div className="quadrant-content we-content">
-        {/* Header */}
-        <div className="we-header">
-          <span className="we-title">WE · INTERIOR COLECTIVO</span>
-        </div>
-
         {/* Layer selector + collective triangle */}
         <div className="we-layer-row">
           <div className="we-layer-tabs">
