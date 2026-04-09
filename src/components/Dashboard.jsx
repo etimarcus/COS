@@ -20,245 +20,272 @@ const TABS = [
 ]
 
 // ═══════════════════════════════════════════
-// DELIBERATORIUM — Argument Map
+// DELIBERATORIUM — Argument Map (Tree Layout)
 // ═══════════════════════════════════════════
 
-const NODE_TYPES = {
-  topic:  { label: 'Topic',          color: '#2a6cb8', bg: 'rgba(42,108,184,0.15)', border: 'rgba(42,108,184,0.5)' },
-  question: { label: 'Question',     color: '#c9a227', bg: 'rgba(201,162,39,0.15)', border: 'rgba(201,162,39,0.5)' },
-  aspect: { label: 'Aspect',         color: '#9b6bbf', bg: 'rgba(155,107,191,0.15)', border: 'rgba(155,107,191,0.5)' },
-  pro:    { label: 'Pro Argument',   color: '#3a9e6e', bg: 'rgba(58,158,110,0.15)', border: 'rgba(58,158,110,0.5)' },
-  contra: { label: 'Contra Argument', color: '#c94444', bg: 'rgba(201,68,68,0.15)',  border: 'rgba(201,68,68,0.5)' },
-}
-
-const EDGE_TYPES = {
-  part_of:    'is part of',
-  answers:    'answers',
-  supports:   'supports',
-  challenges: 'challenges',
-}
-
-// Mock argument map about sustainable agriculture
-const MOCK_NODES = [
-  { id: 'n1',  type: 'topic',    text: 'Sustainable Agriculture',                    x: 480, y: 40 },
-  { id: 'n2',  type: 'question', text: 'Should we prioritize permaculture methods?',  x: 200, y: 140 },
-  { id: 'n3',  type: 'question', text: 'Should we buy organic inputs?',               x: 520, y: 160 },
-  { id: 'n4',  type: 'question', text: 'Should we invest in aquaponics?',             x: 820, y: 140 },
-  { id: 'n5',  type: 'aspect',   text: 'Soil health and regeneration',                x: 80,  y: 280 },
-  { id: 'n6',  type: 'aspect',   text: 'Cost-effectiveness',                          x: 380, y: 300 },
-  { id: 'n7',  type: 'aspect',   text: 'Water management',                            x: 700, y: 280 },
-  { id: 'n8',  type: 'pro',      text: 'Permaculture builds long-term soil fertility without external inputs', x: 50, y: 420 },
-  { id: 'n9',  type: 'pro',      text: 'Food forests require less labor once established',                     x: 250, y: 440 },
-  { id: 'n10', type: 'contra',   text: 'Permaculture yields are lower in the first 3 years',                   x: 100, y: 550 },
-  { id: 'n11', type: 'pro',      text: 'Organic inputs improve biodiversity and pollinator habitat',            x: 420, y: 430 },
-  { id: 'n12', type: 'contra',   text: 'Certified organic inputs are expensive and hard to source locally',     x: 550, y: 550 },
-  { id: 'n13', type: 'pro',      text: 'Aquaponics produces protein and vegetables in a closed loop',          x: 750, y: 420 },
-  { id: 'n14', type: 'contra',   text: 'Aquaponics requires significant upfront capital and electricity',       x: 850, y: 550 },
-  { id: 'n15', type: 'aspect',   text: 'Labor allocation',                            x: 200, y: 300 },
-  { id: 'n16', type: 'pro',      text: 'Local composting eliminates need for purchased fertilizers',            x: 320, y: 560 },
-  { id: 'n17', type: 'contra',   text: 'Water-intensive crops strain the shared irrigation system',             x: 680, y: 550 },
+const ARGUMENT_LAYERS = [
+  {
+    name: 'Topics', desc: 'High-level discussion areas',
+    root: {
+      id: 'root', text: 'Building Rubania Community', type: 'root', children: [
+        { id: 't1', text: 'Infrastructure priorities', type: 'support', relation: 'includes' },
+        { id: 't2', text: 'Governance model', type: 'support', relation: 'includes' },
+        { id: 't3', text: 'Economic system', type: 'support', relation: 'includes' },
+        { id: 't4', text: 'Education approach', type: 'support', relation: 'includes' },
+      ]
+    }
+  },
+  {
+    name: 'Claims', desc: 'Main positions being debated',
+    root: {
+      id: 'root', text: 'What should we build first?', type: 'root', children: [
+        { id: 'c1', text: 'Build school first', type: 'support', relation: 'because', children: [
+          { id: 'c1a', text: 'Education enables everything else', type: 'support', relation: 'because' },
+          { id: 'c1b', text: "Children's development can't wait", type: 'support', relation: 'because' },
+        ]},
+        { id: 'c2', text: 'Build clinic first', type: 'oppose', relation: 'but', children: [
+          { id: 'c2a', text: 'Health is prerequisite for learning', type: 'support', relation: 'because' },
+          { id: 'c2b', text: "Sick children can't attend school", type: 'support', relation: 'because' },
+        ]},
+      ]
+    }
+  },
+  {
+    name: 'Arguments', desc: 'Detailed reasoning',
+    root: {
+      id: 'root', text: 'Build school first', type: 'root', children: [
+        { id: 'a1', text: 'Cognitive development peaks in early years', type: 'support', relation: 'because', children: [
+          { id: 'a1a', text: 'Brain plasticity highest before age 7', type: 'support', relation: 'because' },
+          { id: 'a1b', text: 'Language acquisition has critical period', type: 'support', relation: 'because' },
+        ]},
+        { id: 'a2', text: 'Educated workforce builds everything else', type: 'support', relation: 'because', children: [
+          { id: 'a2a', text: 'Literacy needed for all other skills', type: 'support', relation: 'because' },
+        ]},
+        { id: 'a3', text: 'Adults can delay, children cannot', type: 'support', relation: 'because' },
+        { id: 'a4', text: 'School requires healthy children to attend', type: 'oppose', relation: 'however', children: [
+          { id: 'a4a', text: 'Basic health can be addressed with simpler measures', type: 'oppose', relation: 'but' },
+        ]},
+      ]
+    }
+  },
+  {
+    name: 'Evidence', desc: 'Data and sources',
+    root: {
+      id: 'root', text: 'Cognitive development peaks early', type: 'root', children: [
+        { id: 'e1', text: 'Perry Preschool Study (1962-1967)', type: 'neutral', relation: 'evidence', children: [
+          { id: 'e1a', text: '123 African-American children, ages 3-4', type: 'neutral', relation: 'methodology' },
+          { id: 'e1b', text: 'Followed for 40 years', type: 'neutral', relation: 'methodology' },
+        ]},
+        { id: 'e2', text: 'Heckman & Masterov 2007', type: 'neutral', relation: 'evidence', children: [
+          { id: 'e2a', text: '13:1 ROI over lifetime', type: 'support', relation: 'finding' },
+          { id: 'e2b', text: 'Effects strongest for disadvantaged', type: 'support', relation: 'finding' },
+        ]},
+        { id: 'e3', text: 'UNESCO Global Education Report 2024', type: 'neutral', relation: 'evidence' },
+      ]
+    }
+  },
+  {
+    name: 'Personal', desc: 'Your private annotations',
+    root: {
+      id: 'root', text: 'My thoughts on school-first', type: 'root', children: [
+        { id: 'p1', text: 'I agree, but worried about teacher availability', type: 'support', relation: 'note' },
+        { id: 'p2', text: 'Need to ask Maria about rural school experience', type: 'neutral', relation: 'todo' },
+        { id: 'p3', text: 'Research modular building costs', type: 'neutral', relation: 'todo' },
+        { id: 'p4', text: 'Overall confidence: 75% school-first is correct', type: 'support', relation: 'assessment' },
+      ]
+    }
+  },
 ]
 
-const MOCK_EDGES = [
-  { from: 'n2',  to: 'n1',  type: 'part_of' },
-  { from: 'n3',  to: 'n1',  type: 'part_of' },
-  { from: 'n4',  to: 'n1',  type: 'part_of' },
-  { from: 'n5',  to: 'n2',  type: 'answers' },
-  { from: 'n15', to: 'n2',  type: 'answers' },
-  { from: 'n6',  to: 'n3',  type: 'answers' },
-  { from: 'n7',  to: 'n4',  type: 'answers' },
-  { from: 'n8',  to: 'n5',  type: 'supports' },
-  { from: 'n9',  to: 'n15', type: 'supports' },
-  { from: 'n10', to: 'n8',  type: 'challenges' },
-  { from: 'n11', to: 'n6',  type: 'supports' },
-  { from: 'n12', to: 'n11', type: 'challenges' },
-  { from: 'n16', to: 'n12', type: 'challenges' },
-  { from: 'n13', to: 'n7',  type: 'supports' },
-  { from: 'n14', to: 'n13', type: 'challenges' },
-  { from: 'n17', to: 'n7',  type: 'challenges' },
-]
+const LAYER_ICONS = ['\u{1F310}', '\u{1F4AC}', '\u2696\uFE0F', '\u{1F4CA}', '\u{1F464}']
+
+function layoutTree(rootNode, containerWidth) {
+  const nodeWidth = 160, nodeHeight = 60, hGap = 40, vGap = 80
+  const positions = []
+  function calc(n, d, startX, availW) {
+    const children = n.children || []
+    const nx = d === 0 ? containerWidth / 2 : startX + availW / 2
+    const ny = 100 + d * (nodeHeight + vGap)
+    positions.push({ ...n, x: nx, y: ny, width: nodeWidth, height: nodeHeight })
+    if (children.length > 0) {
+      const totalW = children.length * nodeWidth + (children.length - 1) * hGap
+      const childStart = nx - totalW / 2
+      children.forEach((c, i) => {
+        const cw = nodeWidth + hGap
+        calc(c, d + 1, childStart + i * cw, cw)
+      })
+    }
+  }
+  calc(rootNode, 0, 0, containerWidth)
+  return positions
+}
+
+function buildParentMap(node, parent, map) {
+  if (parent) map[node.id] = parent
+  ;(node.children || []).forEach(c => buildParentMap(c, node, map))
+  return map
+}
 
 function ArgumentMap() {
-  const svgRef = useRef(null)
   const containerRef = useRef(null)
-  const [nodes, setNodes] = useState(MOCK_NODES)
-  const [selectedNode, setSelectedNode] = useState(null)
-  const [dragState, setDragState] = useState(null)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
-  const [isPanning, setIsPanning] = useState(false)
-  const panStart = useRef(null)
+  const canvasRef = useRef(null)
+  const svgRef = useRef(null)
+  const transformRef = useRef(null)
+  const [currentLayer, setCurrentLayer] = useState(0)
+  const zoomRef = useRef(1)
+  const panRef = useRef({ x: 0, y: 0 })
+  const dragRef = useRef({ active: false, startX: 0, startY: 0, panStartX: 0, panStartY: 0 })
 
-  const nodeMap = useMemo(() => {
-    const m = {}
-    nodes.forEach(n => { m[n.id] = n })
-    return m
-  }, [nodes])
-
-  // Drag node
-  const handleNodeMouseDown = useCallback((e, nodeId) => {
-    e.stopPropagation()
-    setDragState({ nodeId, startX: e.clientX, startY: e.clientY, origNode: nodeMap[nodeId] })
-  }, [nodeMap])
-
-  // Pan canvas
-  const handleCanvasMouseDown = useCallback((e) => {
-    if (e.target === svgRef.current || e.target.tagName === 'line' || e.target.tagName === 'text') {
-      setIsPanning(true)
-      panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y }
-    }
-  }, [pan])
-
-  const handleMouseMove = useCallback((e) => {
-    if (dragState) {
-      const dx = e.clientX - dragState.startX
-      const dy = e.clientY - dragState.startY
-      setNodes(prev => prev.map(n =>
-        n.id === dragState.nodeId
-          ? { ...n, x: dragState.origNode.x + dx, y: dragState.origNode.y + dy }
-          : n
-      ))
-    } else if (isPanning && panStart.current) {
-      setPan({ x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y })
-    }
-  }, [dragState, isPanning])
-
-  const handleMouseUp = useCallback(() => {
-    setDragState(null)
-    setIsPanning(false)
-    panStart.current = null
+  const applyTransform = useCallback(() => {
+    if (!transformRef.current) return
+    transformRef.current.style.transform = `translate(${panRef.current.x}px, ${panRef.current.y}px) scale(${zoomRef.current})`
   }, [])
 
-  // Edge path with label
-  const renderEdge = useCallback((edge, i) => {
-    const from = nodeMap[edge.from]
-    const to = nodeMap[edge.to]
-    if (!from || !to) return null
+  const renderLayer = useCallback((idx) => {
+    const canvas = canvasRef.current, svg = svgRef.current, container = containerRef.current
+    if (!canvas || !svg || !container) return
+    canvas.innerHTML = ''
+    svg.innerHTML = ''
+    const layer = ARGUMENT_LAYERS[idx]
+    const cw = container.clientWidth || 960
+    const positions = layoutTree(layer.root, cw)
+    const parentMap = buildParentMap(layer.root, null, {})
+    const posMap = {}
+    positions.forEach(p => { posMap[p.id] = p })
+    svg.setAttribute('width', cw * 3)
+    svg.setAttribute('height', cw * 2)
+    svg.style.overflow = 'visible'
 
-    const fx = from.x + 80, fy = from.y + 18
-    const tx = to.x + 80,   ty = to.y + 18
-    const mx = (fx + tx) / 2, my = (fy + ty) / 2
+    positions.forEach(pos => {
+      const par = parentMap[pos.id]
+      if (!par || !posMap[par.id]) return
+      const pp = posMap[par.id]
+      const fromX = pp.x, fromY = pp.y + pp.height + 10, toX = pos.x, toY = pos.y - 5
+      const midY = (fromY + toY) / 2
+      let color
+      switch (pos.type) {
+        case 'support': color = '#34d399'; break
+        case 'oppose': color = '#fb7185'; break
+        case 'neutral': color = '#38bdf8'; break
+        default: color = '#71717a'
+      }
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      path.setAttribute('d', `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`)
+      path.setAttribute('stroke', color)
+      path.setAttribute('stroke-width', '2')
+      path.setAttribute('fill', 'none')
+      path.setAttribute('opacity', '0.7')
+      svg.appendChild(path)
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      const s = 6
+      arrow.setAttribute('points', `${toX},${toY} ${toX - s},${toY - s * 1.5} ${toX + s},${toY - s * 1.5}`)
+      arrow.setAttribute('fill', color)
+      svg.appendChild(arrow)
+      if (pos.relation && ['because', 'but', 'however'].includes(pos.relation)) {
+        const label = document.createElement('div')
+        label.className = `argmap-conn-label ${pos.relation}`
+        label.textContent = pos.relation
+        label.style.left = ((fromX + toX) / 2 - 25) + 'px'
+        label.style.top = (midY - 8) + 'px'
+        canvas.appendChild(label)
+      }
+    })
 
-    const edgeColor = edge.type === 'challenges' ? 'rgba(201,68,68,0.4)' :
-                      edge.type === 'supports' ? 'rgba(58,158,110,0.4)' :
-                      'rgba(255,255,255,0.15)'
+    positions.forEach(pos => {
+      const node = document.createElement('div')
+      node.className = `argmap-node ${pos.type}`
+      node.textContent = pos.text
+      node.style.left = (pos.x - pos.width / 2) + 'px'
+      node.style.top = pos.y + 'px'
+      node.style.width = pos.width + 'px'
+      canvas.appendChild(node)
+    })
+    applyTransform()
+  }, [applyTransform])
 
-    return (
-      <g key={i}>
-        <line x1={fx} y1={fy} x2={tx} y2={ty} stroke={edgeColor} strokeWidth="1.5" markerEnd="url(#arrowhead)" />
-        <text x={mx} y={my - 6} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'Space Mono', monospace">
-          {EDGE_TYPES[edge.type]}
-        </text>
-      </g>
-    )
-  }, [nodeMap])
+  const switchLayer = useCallback((idx) => {
+    const i = Math.max(0, Math.min(ARGUMENT_LAYERS.length - 1, idx))
+    setCurrentLayer(i)
+    panRef.current = { x: 0, y: 0 }
+    zoomRef.current = 1
+    renderLayer(i)
+  }, [renderLayer])
 
-  // Node rendering
-  const renderNode = useCallback((node) => {
-    const style = NODE_TYPES[node.type]
-    const isSelected = selectedNode?.id === node.id
-    const w = 160, h = 36
+  useEffect(() => {
+    renderLayer(currentLayer)
+    const onResize = () => renderLayer(currentLayer)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [currentLayer, renderLayer])
 
-    return (
-      <g key={node.id}
-         transform={`translate(${node.x}, ${node.y})`}
-         onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
-         onClick={(e) => { e.stopPropagation(); setSelectedNode(isSelected ? null : node) }}
-         style={{ cursor: 'grab' }}
-      >
-        <rect
-          x="0" y="0" width={w} height={h} rx="6"
-          fill={style.bg}
-          stroke={isSelected ? style.color : style.border}
-          strokeWidth={isSelected ? 2 : 1}
-        />
-        {node.type === 'question' && (
-          <text x="12" y="23" fill={style.color} fontSize="16" fontWeight="bold">?</text>
-        )}
-        <text
-          x={node.type === 'question' ? 26 : 10} y="14"
-          fill="#e8e4d9" fontSize="10" fontFamily="'Space Mono', monospace"
-          style={{ dominantBaseline: 'hanging' }}
-        >
-          {node.text.length > 24 ? (
-            <>
-              <tspan x={node.type === 'question' ? 26 : 10} dy="0">{node.text.slice(0, 24)}</tspan>
-              <tspan x={node.type === 'question' ? 26 : 10} dy="13">{node.text.slice(24, 48)}{node.text.length > 48 ? '...' : ''}</tspan>
-            </>
-          ) : node.text}
-        </text>
-      </g>
-    )
-  }, [selectedNode, handleNodeMouseDown])
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const onWheel = (e) => {
+      e.preventDefault()
+      const oldZ = zoomRef.current
+      zoomRef.current = Math.max(0.3, Math.min(2.5, oldZ - e.deltaY * 0.001))
+      const rect = el.getBoundingClientRect()
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top
+      const r = zoomRef.current / oldZ
+      panRef.current.x = mx - (mx - panRef.current.x) * r
+      panRef.current.y = my - (my - panRef.current.y) * r
+      applyTransform()
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [applyTransform])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const onDown = (e) => {
+      if (e.target.classList.contains('argmap-node')) return
+      dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, panStartX: panRef.current.x, panStartY: panRef.current.y }
+    }
+    const onMove = (e) => {
+      if (!dragRef.current.active) return
+      panRef.current.x = dragRef.current.panStartX + (e.clientX - dragRef.current.startX)
+      panRef.current.y = dragRef.current.panStartY + (e.clientY - dragRef.current.startY)
+      applyTransform()
+    }
+    const onUp = () => { dragRef.current.active = false }
+    el.addEventListener('mousedown', onDown)
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => { el.removeEventListener('mousedown', onDown); window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+  }, [applyTransform])
+
+  const layer = ARGUMENT_LAYERS[currentLayer]
 
   return (
-    <div className="delib-tab">
-      {/* Legend */}
-      <div className="delib-legend">
-        {Object.entries(NODE_TYPES).map(([key, style]) => (
-          <div key={key} className="delib-legend-item">
-            <span className="delib-legend-dot" style={{ backgroundColor: style.color }} />
-            <span className="delib-legend-label">{style.label}</span>
-          </div>
-        ))}
-        <span className="delib-legend-count">Connections: {MOCK_EDGES.length}</span>
-      </div>
-
-      {/* Canvas */}
-      <div className="delib-canvas" ref={containerRef}
-           onMouseMove={handleMouseMove}
-           onMouseUp={handleMouseUp}
-           onMouseLeave={handleMouseUp}
-      >
-        <svg ref={svgRef} width="100%" height="100%"
-             onMouseDown={handleCanvasMouseDown}
-             style={{ cursor: isPanning ? 'grabbing' : 'default' }}
-        >
-          <defs>
-            <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,0.3)" />
-            </marker>
-          </defs>
-          <g transform={`translate(${pan.x}, ${pan.y})`}>
-            {MOCK_EDGES.map(renderEdge)}
-            {nodes.map(renderNode)}
-          </g>
-        </svg>
-      </div>
-
-      {/* Detail panel */}
-      {selectedNode && (
-        <div className="delib-detail">
-          <div className="delib-detail-header">
-            <span className="delib-detail-type" style={{ color: NODE_TYPES[selectedNode.type].color }}>
-              {NODE_TYPES[selectedNode.type].label}
-            </span>
-            <button className="delib-detail-close" onClick={() => setSelectedNode(null)}>x</button>
-          </div>
-          <p className="delib-detail-text">{selectedNode.text}</p>
-          <div className="delib-detail-connections">
-            <span className="delib-detail-label">Connections</span>
-            {MOCK_EDGES.filter(e => e.from === selectedNode.id || e.to === selectedNode.id).map((e, i) => {
-              const otherId = e.from === selectedNode.id ? e.to : e.from
-              const other = nodeMap[otherId]
-              if (!other) return null
-              const direction = e.from === selectedNode.id ? '→' : '←'
-              return (
-                <div key={i} className="delib-connection"
-                     onClick={() => setSelectedNode(other)}
-                >
-                  <span className="conn-dir">{direction}</span>
-                  <span className="conn-type">{EDGE_TYPES[e.type]}</span>
-                  <span className="conn-target" style={{ color: NODE_TYPES[other.type].color }}>{other.text.slice(0, 40)}{other.text.length > 40 ? '...' : ''}</span>
-                </div>
-              )
-            })}
-          </div>
+    <div className="argmap-wrap">
+      <div className="argmap-container" ref={containerRef}>
+        <div className="argmap-transform" ref={transformRef}>
+          <svg ref={svgRef} className="argmap-svg" />
+          <div ref={canvasRef} className="argmap-canvas" />
         </div>
-      )}
-
-      <p className="delib-footer-note">
-        Drag nodes to rearrange. Click a node to inspect connections. Pan the canvas by dragging empty space.
-      </p>
+      </div>
+      <div className="argmap-overlay">
+        <div className="argmap-layer-info">
+          <div className="argmap-layer-name">{layer.name}</div>
+          <div className="argmap-layer-desc">{layer.desc}</div>
+        </div>
+        <div className="argmap-layer-nav">
+          {ARGUMENT_LAYERS.map((l, i) => (
+            <button key={i} className={`argmap-layer-btn ${currentLayer === i ? 'active' : ''}`} onClick={() => switchLayer(i)}>
+              <span className="argmap-layer-icon">{LAYER_ICONS[i]}</span>
+              <span className="argmap-layer-label">{l.name}</span>
+            </button>
+          ))}
+        </div>
+        <div className="argmap-legend">
+          <div className="argmap-legend-item"><span className="argmap-dot" style={{ background: '#fbbf24' }} />Root claim</div>
+          <div className="argmap-legend-item"><span className="argmap-dot" style={{ background: '#34d399' }} />Support (because)</div>
+          <div className="argmap-legend-item"><span className="argmap-dot" style={{ background: '#fb7185' }} />Oppose (but)</div>
+        </div>
+        <div className="argmap-instructions"><kbd>Scroll</kbd> Zoom &nbsp; <kbd>Drag</kbd> Pan</div>
+      </div>
     </div>
   )
 }
