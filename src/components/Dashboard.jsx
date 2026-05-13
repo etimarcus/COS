@@ -5,7 +5,6 @@
  */
 
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
-import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import './Dashboard.css'
 
@@ -358,6 +357,49 @@ const DevotioBar = ({ label, value }) => (
   </div>
 )
 
+// Mock economic data — Economics tab runs in shell mode until DB schema is implemented
+const MOCK_PERIOD = {
+  id: 'mock-period-1',
+  period_number: 7,
+  status: 'closed',
+  weight_cognitive: 0.32,
+  weight_volitional: 0.18,
+  weight_emotional: 0.28,
+  weight_physical: 0.22,
+  total_cognitive: 1200,
+  total_volitional: 2100,
+  total_emotional: 1400,
+  total_physical: 1800,
+  total_surplus: 28000,
+}
+
+const MOCK_SUMMARY = {
+  total_minutes: 2400,
+  weighted_cognitive: 840,
+  weighted_volitional: 360,
+  weighted_emotional: 720,
+  weighted_physical: 480,
+  devotio_coefficient: 1.15,
+  exchange_rate: 0.267,
+  actions_earned: 736.92,
+  actions_redeemed: 200,
+  ruban_received: 200,
+}
+
+const MOCK_DEVOTIO = {
+  vocatio: 78,
+  opus: 65,
+  societas: 82,
+  familia: 60,
+  salus: 70,
+}
+
+const MOCK_TREASURY = [
+  { movement_type: 'Wholesale Sales', amount: 18000 },
+  { movement_type: 'Local Sales', amount: 9500 },
+  { movement_type: 'Visitor Sales', amount: 7500 },
+]
+
 const getWeightInsight = (period) => {
   const weights = [
     { name: 'Cognitio', value: period.weight_cognitive },
@@ -377,68 +419,14 @@ export function Dashboard({ onBack, memberId }) {
   const { signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('deliberatorium')
 
-  // Economics tab state
-  const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState(null)
-  const [summary, setSummary] = useState(null)
-  const [devotio, setDevotio] = useState(null)
-  const [treasury, setTreasury] = useState([])
+  // Economics tab state — shell mode, see MOCK_* constants above
+  const [loading] = useState(false)
+  const [period] = useState(MOCK_PERIOD)
+  const [summary, setSummary] = useState(MOCK_SUMMARY)
+  const [devotio] = useState(MOCK_DEVOTIO)
+  const [treasury] = useState(MOCK_TREASURY)
   const [redeemAmount, setRedeemAmount] = useState('')
   const [redeeming, setRedeeming] = useState(false)
-
-  useEffect(() => {
-    if (memberId) fetchEconomicData()
-  }, [memberId])
-
-  const fetchEconomicData = async () => {
-    setLoading(true)
-    try {
-      // Get latest closed period
-      const { data: periodData } = await supabase
-        .from('periods')
-        .select('*')
-        .eq('status', 'closed')
-        .order('period_number', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (periodData) {
-        setPeriod(periodData)
-
-        // Get member summary for this period
-        const { data: summaryData } = await supabase
-          .from('member_period_summary')
-          .select('*, members(name, email)')
-          .eq('member_id', memberId)
-          .eq('period_id', periodData.id)
-          .single()
-
-        setSummary(summaryData)
-
-        // Get treasury movements
-        const { data: treasuryData } = await supabase
-          .from('treasury')
-          .select('*')
-          .eq('period_id', periodData.id)
-          .order('created_at')
-
-        setTreasury(treasuryData || [])
-      }
-
-      // Get DEVOTIO profile
-      const { data: devotioData } = await supabase
-        .from('member_devotio')
-        .select('*')
-        .eq('member_id', memberId)
-        .single()
-
-      setDevotio(devotioData)
-
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    }
-    setLoading(false)
-  }
 
   const handleRedeem = async () => {
     const amount = parseFloat(redeemAmount)
@@ -451,24 +439,15 @@ export function Dashboard({ onBack, memberId }) {
     }
 
     setRedeeming(true)
-    try {
-      const { data, error } = await supabase.rpc('redeem_actions', {
-        p_member_id: memberId,
-        p_period_id: period.id,
-        p_actions_to_redeem: amount
-      })
-
-      if (error) throw error
-
-      // Refresh data
-      await fetchEconomicData()
-      setRedeemAmount('')
-      alert(`Redeemed ${amount} Actions for ${data[0]?.out_ruban_received?.toFixed(2)} Ruban Cash`)
-    } catch (error) {
-      console.error('Redemption error:', error)
-      alert('Error redeeming: ' + error.message)
-    }
+    const rubanReceived = amount
+    setSummary({
+      ...summary,
+      actions_redeemed: summary.actions_redeemed + amount,
+      ruban_received: summary.ruban_received + rubanReceived,
+    })
+    setRedeemAmount('')
     setRedeeming(false)
+    alert(`Redeemed ${amount} Actions for ${rubanReceived.toFixed(2)} Ruban Cash (demo)`)
   }
 
   const formatPercent = (value) => (value * 100).toFixed(1) + '%'
