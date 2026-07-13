@@ -10,6 +10,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { NARRATIVES, TOKEN_TYPES } from '../../data/demoNarratives'
 import './NarrativeBubble.css'
 
@@ -90,7 +91,9 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
     ? narrative.blocks.find(b => b.id === selectedBlockId)
     : null
 
-  return (
+  // Portal to body: fixed ancestors (os-container) trap z-index in WebKit,
+  // leaving the cross dividers and center disc above the overlay
+  return createPortal(
     <div className="narrative-overlay" onClick={onClose} onContextMenu={(e) => e.preventDefault()}>
       <div className="narrative-content" onClick={(e) => e.stopPropagation()}>
         <button className="bubble-close" onClick={onClose}>×</button>
@@ -208,7 +211,8 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
           Narrativa viva: el texto se compone con la variante más relevante de cada bloque.
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

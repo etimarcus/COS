@@ -18,6 +18,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../../supabaseClient'
 import { DEMO_BRANCH } from '../../data/demoNarratives'
 import NarrativeBubble from './NarrativeBubble'
@@ -948,8 +949,8 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
 
       </div>
 
-      {/* Definition bubble */}
-      {definitionBubble && (
+      {/* Definition bubble (portaled to body so it stacks above the cross dividers) */}
+      {definitionBubble && createPortal(
         <div className="definition-bubble" onClick={(e) => { e.stopPropagation(); setDefinitionBubble(null); }} onContextMenu={(e) => e.preventDefault()}>
           <div className={`bubble-content ${definitionBubble.issues?.length > 0 ? 'has-issues' : ''}`} onClick={(e) => e.stopPropagation()} onContextMenu={(e) => {
             e.preventDefault()
@@ -1051,7 +1052,8 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Community narrative bubble (demo) */}
@@ -1064,7 +1066,7 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
       )}
 
       {/* Add word bubble */}
-      {addWordBubble && (
+      {addWordBubble && createPortal(
         <div className="definition-bubble" onClick={(e) => { e.stopPropagation(); setAddWordBubble(null); }} onContextMenu={(e) => e.preventDefault()}>
           <div className="bubble-content add-word-bubble" onClick={(e) => e.stopPropagation()} onContextMenu={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => { setAddWordBubble(null); setAddWordParent(null); }}>×</button>
@@ -1115,11 +1117,12 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit word bubble */}
-      {editWordBubble && (
+      {editWordBubble && createPortal(
         <div className="definition-bubble" onClick={(e) => { e.stopPropagation(); setEditWordBubble(null); }} onContextMenu={(e) => e.preventDefault()}>
           <div className="bubble-content add-word-bubble" onClick={(e) => e.stopPropagation()} onContextMenu={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => setEditWordBubble(null)}>×</button>
@@ -1168,7 +1171,8 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

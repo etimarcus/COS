@@ -19,6 +19,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../../supabaseClient'
 import './UpperLeft.css'
 
@@ -646,8 +647,8 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
         onChange={handleFileUpload}
       />
 
-      {/* Item detail bubble */}
-      {selectedItem && (
+      {/* Item detail bubble (portaled to body so it stacks above the cross dividers) */}
+      {selectedItem && createPortal(
         <div className="item-bubble" onClick={(e) => { e.stopPropagation(); setSelectedItem(null); }}>
           <div className="bubble-content" onClick={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => setSelectedItem(null)}>×</button>
@@ -740,11 +741,12 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Add item bubble */}
-      {addItemBubble && (
+      {addItemBubble && createPortal(
         <div className="item-bubble" onClick={(e) => { e.stopPropagation(); setAddItemBubble(null); }}>
           <div className="bubble-content add-item-bubble" onClick={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => setAddItemBubble(null)}>×</button>
@@ -805,11 +807,12 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit item bubble (skills only) */}
-      {editItemBubble && (
+      {editItemBubble && createPortal(
         <div className="item-bubble" onClick={(e) => { e.stopPropagation(); setEditItemBubble(null); }}>
           <div className="bubble-content add-item-bubble" onClick={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => setEditItemBubble(null)}>×</button>
@@ -861,11 +864,12 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Contacts list */}
-      {contactsList && (
+      {contactsList && createPortal(
         <div className="item-bubble" onClick={(e) => { e.stopPropagation(); setContactsList(null); }}>
           <div className="bubble-content contacts-bubble" onClick={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => setContactsList(null)}>×</button>
@@ -892,7 +896,8 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
