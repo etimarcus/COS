@@ -19,10 +19,53 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { supabase } from '../../supabaseClient'
+import { DEMO_BRANCH } from '../../data/demoNarratives'
+import NarrativeBubble from './NarrativeBubble'
 import './UpperRight.css'
 
 // Default ministry (fallback) - will be populated dynamically from tier 1 words
 const DEFAULT_MINISTRY = { name: 'Uncategorized', color: '#9E9E9E' }
+
+// Demo words live only in the client (not in Supabase) - ids prefixed 'demo-'
+const isDemoWord = (id) => String(id).startsWith('demo-')
+
+// Inject the "Leyes y Reglamentos" demo branch (community narratives) into the map
+const injectDemoBranch = (map) => {
+  map[DEMO_BRANCH.id] = {
+    id: DEMO_BRANCH.id,
+    label: DEMO_BRANCH.label,
+    word: DEMO_BRANCH.label,
+    tier: 1,
+    ministry_name: DEMO_BRANCH.label,
+    ministry_color: DEMO_BRANCH.color,
+    isDemo: true,
+    children: DEMO_BRANCH.topics.map(t => ({
+      id: t.id,
+      text: t.label,
+      color: DEMO_BRANCH.color
+    }))
+  }
+
+  DEMO_BRANCH.topics.forEach(topic => {
+    map[topic.id] = {
+      id: topic.id,
+      label: topic.label,
+      word: topic.label,
+      tier: 2,
+      ministry_name: DEMO_BRANCH.label,
+      ministry_color: DEMO_BRANCH.color,
+      isDemo: true,
+      narrativeId: topic.narrativeId,
+      children: []
+    }
+  })
+
+  map['root'].children.push({
+    id: DEMO_BRANCH.id,
+    text: DEMO_BRANCH.label,
+    color: DEMO_BRANCH.color
+  })
+}
 
 // Calculate positions ensuring no overlap, clustered around center
 const calculateWordPositions = (words) => {
@@ -109,6 +152,7 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
   const [definitionBubble, setDefinitionBubble] = useState(null)
+  const [narrativeBubble, setNarrativeBubble] = useState(null)
   const [addWordBubble, setAddWordBubble] = useState(null)
   const [addWordParent, setAddWordParent] = useState(null) // For creating child of specific word
   const [editWordBubble, setEditWordBubble] = useState(null)
@@ -184,6 +228,8 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
           color: word.ministry_color
         }))
       }
+
+      injectDemoBranch(map)
 
       setWordsMap(map)
       setLoading(false)
@@ -316,6 +362,9 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
     // Regular click: navigate to children or show definition
     if (wordsMap[topic.id]?.children?.length > 0) {
       navigateToChild(topic.id)
+    } else if (wordsMap[topic.id]?.narrativeId) {
+      // Community narrative - open tokenized text with variant voting
+      setNarrativeBubble(wordsMap[topic.id].narrativeId)
     } else {
       // Leaf node - fetch definition and issues
       const wordData = wordsMap[topic.id]
@@ -383,6 +432,12 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
       e.preventDefault()
       e.stopPropagation()
 
+      // Demo words are client-only, not editable
+      if (isDemoWord(topic.id)) {
+        onShowInfo?.('Demo word - not editable')
+        return
+      }
+
       // Open edit bubble for this word
       const wordData = wordsMap[topic.id]
       const ministry = ministries.find(m => m.name === wordData?.ministry_name) || ministries[ministries.length - 1] || DEFAULT_MINISTRY
@@ -410,6 +465,10 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
 
     // Shift + right click: make activated word a child of clicked word
     if (e.shiftKey && activatedWord && activatedWord.id !== topic.id) {
+      if (isDemoWord(topic.id) || isDemoWord(activatedWord.id)) {
+        onShowInfo?.('Demo words cannot be connected')
+        return
+      }
       setSaving(true)
       try {
         // Update the activated word's parent_id to the clicked word's id
@@ -725,8 +784,9 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         // First priority: close any open dialogs/bubbles
-        if (definitionBubble || addWordBubble || editWordBubble || activatedWord) {
+        if (definitionBubble || narrativeBubble || addWordBubble || editWordBubble || activatedWord) {
           setDefinitionBubble(null)
+          setNarrativeBubble(null)
           setAddWordBubble(null)
           setAddWordParent(null)
           setEditWordBubble(null)
@@ -754,7 +814,7 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [addWordBubble, editWordBubble, definitionBubble, activatedWord, path, handleSaveNewWord, handleSaveEditWord])
+  }, [addWordBubble, editWordBubble, definitionBubble, narrativeBubble, activatedWord, path, handleSaveNewWord, handleSaveEditWord])
 
   // Reset view when navigating
   useEffect(() => {
@@ -808,7 +868,7 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
                     className={`breadcrumb-item ${isActive ? 'active editable' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation()
-                      if (isActive && nodeId !== 'root') {
+                      if (isActive && nodeId !== 'root' && !isDemoWord(nodeId)) {
                         // Click on active breadcrumb opens edit dialog
                         const wordData = wordsMap[nodeId]
                         const ministry = ministries.find(m => m.name === wordData?.ministry_name) || ministries[ministries.length - 1] || DEFAULT_MINISTRY
@@ -992,6 +1052,15 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
             )}
           </div>
         </div>
+      )}
+
+      {/* Community narrative bubble (demo) */}
+      {narrativeBubble && (
+        <NarrativeBubble
+          narrativeId={narrativeBubble}
+          onClose={() => setNarrativeBubble(null)}
+          onShowInfo={onShowInfo}
+        />
       )}
 
       {/* Add word bubble */}
