@@ -742,89 +742,19 @@ export function Dashboard({ onBack, memberId }) {
           )
         })()}
 
-        {/* Wallet Section (demo) */}
+        {/* Wallet shortcut — full wallet lives in its own tab */}
         {summary && (
-          <section className="eco-section eco-wallet">
-            <h2>Wallet</h2>
-            <p className="eco-desc">Demo preview — balances and movements are illustrative.</p>
-
-            <div className="wallet-layout">
-              {/* Balance card */}
-              <div className="wallet-card">
-                <div className="wallet-card-header">
-                  <span className="wallet-brand">RUBAN</span>
-                  <span className="wallet-period">Period {period.period_number}</span>
-                </div>
-                <div className="wallet-balance">
-                  <span className="wallet-balance-label">Available balance</span>
-                  <span className="wallet-balance-value">₽ {formatNumber(walletBalance)}</span>
-                </div>
-                <div className="wallet-sub-balances">
-                  <div className="wallet-sub">
-                    <span className="ws-label">Basic share</span>
-                    <span className="ws-value">₽ {formatNumber(period.basic_share)}</span>
-                  </div>
-                  <div className="wallet-sub">
-                    <span className="ws-label">Praxion bonus</span>
-                    <span className="ws-value">₽ {formatNumber(summary.praxion_earned * ecoExchangeRate)}</span>
-                  </div>
-                  <div className="wallet-sub">
-                    <span className="ws-label">Praxion stake</span>
-                    <span className="ws-value">{formatNumber(summary.praxion_accumulated)} ⚡</span>
-                  </div>
-                </div>
-                <div className="wallet-actions">
-                  <button className="wallet-btn" onClick={() => alert('Demo: buy surplus production with Ruban Cash')}>
-                    📦 Buy surplus
-                  </button>
-                  <button className="wallet-btn" onClick={() => alert('Demo: convert Ruban Cash to USD')}>
-                    💵 To USD
-                  </button>
-                </div>
+          <section className="eco-section eco-wallet-link">
+            <div className="wallet-link-row">
+              <div className="wallet-link-info">
+                <h2>Wallet</h2>
+                <p className="eco-desc">
+                  Balance ₽{formatNumber(walletBalance)} · Praxion stake {formatNumber(summary.praxion_accumulated)}
+                </p>
               </div>
-
-              {/* Transactions */}
-              <div className="wallet-transactions">
-                <h3>Movements</h3>
-                <div className="wallet-tx-list">
-                  {walletTransactions.map((tx, i) => (
-                    <div key={i} className="wallet-tx">
-                      <span className="tx-date">{tx.date}</span>
-                      <span className="tx-label">{tx.label}</span>
-                      <span className={`tx-amount ${tx.amount >= 0 ? 'in' : 'out'}`}>
-                        {tx.amount >= 0 ? '+' : '−'}₽{formatNumber(Math.abs(tx.amount))}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Redeem accumulated Praxion stake */}
-                <div className="redeem-section">
-                  <h3>Redeem Praxion Stake</h3>
-                  <p className="redeem-desc">
-                    Convert accumulated Praxion to Ruban Cash at this period's rate
-                    (₽{formatNumber(ecoExchangeRate, 3)}), or keep it as a future stake.
-                  </p>
-                  <div className="redeem-form">
-                    <input
-                      type="number"
-                      placeholder="Praxion to redeem"
-                      value={redeemAmount}
-                      onChange={(e) => setRedeemAmount(e.target.value)}
-                      max={summary.praxion_accumulated}
-                      step="0.01"
-                    />
-                    <span className="available">Available: {formatNumber(summary.praxion_accumulated)}</span>
-                    <button
-                      onClick={handleRedeem}
-                      disabled={redeeming || !redeemAmount}
-                      className="redeem-btn"
-                    >
-                      {redeeming ? 'Processing...' : 'Redeem'}
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <button className="wallet-link-btn" onClick={() => setActiveTab('wallet')}>
+                Open Wallet →
+              </button>
             </div>
           </section>
         )}
@@ -974,6 +904,129 @@ export function Dashboard({ onBack, memberId }) {
               </div>
             )}
           </section>
+        </div>
+      </div>
+    )
+  }
+
+  // Wallet tab content (demo draft)
+  const renderWalletTab = () => {
+    const RUBAN_USD_RATE = 0.85 // demo conversion rate
+    const personalBonus = summary.praxion_earned * ecoExchangeRate
+    const stakeValue = summary.praxion_accumulated * ecoExchangeRate
+
+    return (
+      <div className="wallet-tab">
+        <header className="wallet-header">
+          <h1>💰 Wallet</h1>
+          <p className="wallet-subtitle">Demo preview — balances and movements are illustrative</p>
+        </header>
+
+        {/* Period summary strip */}
+        <div className="wallet-strip">
+          <div className="strip-item">
+            <span className="strip-label">Period</span>
+            <span className="strip-value">{period.period_number}</span>
+          </div>
+          <div className="strip-item">
+            <span className="strip-label">Basic share</span>
+            <span className="strip-value">₽ {formatNumber(period.basic_share)}</span>
+          </div>
+          <div className="strip-item">
+            <span className="strip-label">Praxion bonus</span>
+            <span className="strip-value">₽ {formatNumber(personalBonus)}</span>
+          </div>
+          <div className="strip-item">
+            <span className="strip-label">Exchange rate</span>
+            <span className="strip-value">₽ {formatNumber(ecoExchangeRate, 3)} / Praxion</span>
+          </div>
+          <div className="strip-item">
+            <span className="strip-label">Ruban → USD</span>
+            <span className="strip-value">$ {formatNumber(RUBAN_USD_RATE)} / ₽</span>
+          </div>
+        </div>
+
+        <div className="wallet-layout">
+          {/* Balance card */}
+          <div className="wallet-card">
+            <div className="wallet-card-header">
+              <span className="wallet-brand">RUBAN</span>
+              <span className="wallet-period">Period {period.period_number}</span>
+            </div>
+            <div className="wallet-balance">
+              <span className="wallet-balance-label">Available balance</span>
+              <span className="wallet-balance-value">₽ {formatNumber(walletBalance)}</span>
+              <span className="wallet-balance-usd">≈ $ {formatNumber(walletBalance * RUBAN_USD_RATE)} USD</span>
+            </div>
+            <div className="wallet-sub-balances">
+              <div className="wallet-sub">
+                <span className="ws-label">Basic share</span>
+                <span className="ws-value">₽ {formatNumber(period.basic_share)}</span>
+              </div>
+              <div className="wallet-sub">
+                <span className="ws-label">Praxion bonus</span>
+                <span className="ws-value">₽ {formatNumber(personalBonus)}</span>
+              </div>
+              <div className="wallet-sub">
+                <span className="ws-label">Praxion stake</span>
+                <span className="ws-value">{formatNumber(summary.praxion_accumulated)} ⚡ (≈ ₽ {formatNumber(stakeValue)})</span>
+              </div>
+            </div>
+            <div className="wallet-actions">
+              <button className="wallet-btn" onClick={() => alert('Demo: buy surplus production with Ruban Cash')}>
+                📦 Buy surplus
+              </button>
+              <button className="wallet-btn" onClick={() => alert('Demo: convert Ruban Cash to USD')}>
+                💵 To USD
+              </button>
+              <button className="wallet-btn" onClick={() => alert('Demo: send Ruban Cash to another member')}>
+                🤝 Send
+              </button>
+            </div>
+          </div>
+
+          {/* Transactions */}
+          <div className="wallet-transactions">
+            <h3>Movements</h3>
+            <div className="wallet-tx-list">
+              {walletTransactions.map((tx, i) => (
+                <div key={i} className="wallet-tx">
+                  <span className="tx-date">{tx.date}</span>
+                  <span className="tx-label">{tx.label}</span>
+                  <span className={`tx-amount ${tx.amount >= 0 ? 'in' : 'out'}`}>
+                    {tx.amount >= 0 ? '+' : '−'}₽{formatNumber(Math.abs(tx.amount))}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Redeem accumulated Praxion stake */}
+            <div className="redeem-section">
+              <h3>Redeem Praxion Stake</h3>
+              <p className="redeem-desc">
+                Convert accumulated Praxion to Ruban Cash at this period's rate
+                (₽{formatNumber(ecoExchangeRate, 3)}), or keep it as a future stake.
+              </p>
+              <div className="redeem-form">
+                <input
+                  type="number"
+                  placeholder="Praxion to redeem"
+                  value={redeemAmount}
+                  onChange={(e) => setRedeemAmount(e.target.value)}
+                  max={summary.praxion_accumulated}
+                  step="0.01"
+                />
+                <span className="available">Available: {formatNumber(summary.praxion_accumulated)}</span>
+                <button
+                  onClick={handleRedeem}
+                  disabled={redeeming || !redeemAmount}
+                  className="redeem-btn"
+                >
+                  {redeeming ? 'Processing...' : 'Redeem'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -1203,12 +1256,7 @@ export function Dashboard({ onBack, memberId }) {
 
         {activeTab === 'economics' && renderEconomicsTab()}
 
-        {activeTab === 'wallet' && (
-          <div className="tab-placeholder">
-            <h2>Wallet</h2>
-            <p>View your balance and transactions</p>
-          </div>
-        )}
+        {activeTab === 'wallet' && renderWalletTab()}
 
         {activeTab === 'calendar' && renderCalendarTab()}
 
