@@ -433,3 +433,30 @@
     font-size: 0.6rem;
   }
 }
+
+/* ═══════════════════════════════════════════
+   COMMITMENT STATE (task in calendar)
+═══════════════════════════════════════════ */
+
+.we-committed-badge {
+  margin-left: 0.35rem;
+  font-size: 0.75em;
+}
+
+.we-committed-note {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--accent-gold, #c9a227);
+  margin-bottom: 0.4rem;
+}
+
+.we-btn-anotarme.committed {
+  background: transparent;
+  border: 1px solid var(--accent-gold-dim, rgba(201, 162, 39, 0.3));
+  color: var(--accent-gold, #c9a227);
+}
+
+.we-btn-anotarme.committed:hover {
+  border-color: #f87171;
+  color: #f87171;
+}

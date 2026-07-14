@@ -2391,3 +2391,227 @@
     width: 100%;
   }
 }
+
+/* ═══════════════════════════════════════════
+   CALENDAR TAB
+═══════════════════════════════════════════ */
+
+.calendar-tab {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.calendar-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  color: var(--text-light, #e8e4d9);
+  margin: 0 0 0.25rem;
+}
+
+.calendar-subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted, #888);
+  margin: 0 0 1.5rem;
+}
+
+.calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.calendar-month,
+.calendar-upcoming {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.calendar-month h2,
+.calendar-upcoming h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  color: var(--accent-gold, #c9a227);
+  margin: 0 0 1rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendar-dow {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+  text-align: center;
+  padding: 0.3rem 0;
+}
+
+.calendar-cell {
+  min-height: 68px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.calendar-cell.empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.calendar-cell.today {
+  border-color: var(--accent-gold, #c9a227);
+  background: rgba(201, 162, 39, 0.08);
+}
+
+.cell-day {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-muted, #888);
+}
+
+.calendar-cell.today .cell-day {
+  color: var(--accent-gold, #c9a227);
+  font-weight: 700;
+}
+
+.calendar-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  line-height: 1.2;
+  color: var(--text-light, #e8e4d9);
+  background: color-mix(in srgb, var(--layer-color) 22%, transparent);
+  border-left: 2px solid var(--layer-color);
+  border-radius: 3px;
+  padding: 0.15rem 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-legend {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.calendar-legend .legend-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted, #888);
+}
+
+.calendar-legend .legend-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.calendar-empty {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: var(--text-muted, #888);
+  line-height: 1.5;
+}
+
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--layer-color);
+  border-radius: 6px;
+}
+
+.upcoming-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.4rem;
+}
+
+.upcoming-date .ud-day {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-light, #e8e4d9);
+  line-height: 1;
+}
+
+.upcoming-date .ud-month {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+}
+
+.upcoming-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.upcoming-title {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-light, #e8e4d9);
+  line-height: 1.25;
+}
+
+.upcoming-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--text-muted, #888);
+}
+
+.upcoming-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted, #888);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  transition: color 0.2s;
+}
+
+.upcoming-remove:hover {
+  color: #f87171;
+}
+
+@media (max-width: 768px) {
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-cell {
+    min-height: 48px;
+  }
+
+  .calendar-chip {
+    font-size: 0.45rem;
+  }
+}

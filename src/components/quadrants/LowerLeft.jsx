@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react'
+import { useCommitments, addCommitment, removeCommitment } from '../../data/commitments'
 import './LowerLeft.css'
 
 // ═══════════════════════════════════════════
@@ -111,6 +112,20 @@ function CompositionBar({ c, s, l }) {
 export function LowerLeft({ onNavigate, onShowInfo, onExpand, expanded, userId }) {
   const [activeLayer, setActiveLayer] = useState('HOMESTEAD')
   const [expandedTask, setExpandedTask] = useState(null)
+  const commitments = useCommitments()
+
+  const handleSignUp = useCallback((e, task) => {
+    e.stopPropagation()
+    if (commitments.some(c => c.taskId === task.id)) {
+      removeCommitment(task.id)
+      onShowInfo?.(`Te quitaste de: ${task.title} — eliminada del calendario`)
+    } else {
+      const next = addCommitment(task, activeLayer)
+      const added = next.find(c => c.taskId === task.id)
+      const day = new Date(added.date).toLocaleDateString('es', { day: 'numeric', month: 'short' })
+      onShowInfo?.(`Te anotaste en: ${task.title} — agendada el ${day} en tu calendario`)
+    }
+  }, [commitments, activeLayer, onShowInfo])
 
   const collective = MOCK_COLLECTIVE[activeLayer]
   const tasks = MOCK_TASKS[activeLayer]
@@ -196,7 +211,9 @@ export function LowerLeft({ onNavigate, onShowInfo, onExpand, expanded, userId }
 
         {/* Task list */}
         <div className="we-task-list" onClick={e => e.stopPropagation()}>
-          {visibleTasks.map(task => (
+          {visibleTasks.map(task => {
+            const committed = commitments.some(c => c.taskId === task.id)
+            return (
             <div
               key={task.id}
               className={`we-task-card ${expandedTask?.id === task.id ? 'expanded' : ''}`}
@@ -207,7 +224,10 @@ export function LowerLeft({ onNavigate, onShowInfo, onExpand, expanded, userId }
                   <TriSVG c={task.cognitio} s={task.sympathia} l={task.labor} size={42} />
                 </div>
                 <div className="we-task-info">
-                  <span className="we-task-title">{task.title}</span>
+                  <span className="we-task-title">
+                    {task.title}
+                    {committed && <span className="we-committed-badge" title="En tu calendario">📅</span>}
+                  </span>
                   <CompositionBar c={task.cognitio} s={task.sympathia} l={task.labor} />
                 </div>
                 <span className="we-task-spots">{task.filled}/{task.spots}</span>
@@ -229,13 +249,22 @@ export function LowerLeft({ onNavigate, onShowInfo, onExpand, expanded, userId }
                       <span className="we-resources-label">Recursos:</span> {task.resources}
                     </div>
                   )}
-                  <button className="we-btn-anotarme" onClick={(e) => { e.stopPropagation(); onShowInfo?.(`Te anotaste en: ${task.title}`) }}>
-                    ANOTARME
+                  {committed && (
+                    <div className="we-committed-note">
+                      Agendada el {new Date(commitments.find(c => c.taskId === task.id).date).toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </div>
+                  )}
+                  <button
+                    className={`we-btn-anotarme ${committed ? 'committed' : ''}`}
+                    onClick={(e) => handleSignUp(e, task)}
+                  >
+                    {committed ? '✓ ANOTADO — QUITARME' : 'ANOTARME'}
                   </button>
                 </div>
               )}
             </div>
-          ))}
+            )
+          })}
 
           {/* Show count hint in grid mode */}
           {!expanded && sortedTasks.length > PREVIEW_COUNT && (

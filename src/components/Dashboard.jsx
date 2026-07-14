@@ -6,6 +6,7 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useCommitments, removeCommitment } from '../data/commitments'
 import './Dashboard.css'
 
 // Tab configuration
@@ -441,6 +442,9 @@ export function Dashboard({ onBack, memberId }) {
   const { signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('deliberatorium')
 
+  // Task commitments signed up from the Lower Left quadrant
+  const commitments = useCommitments()
+
   // Economics tab state — shell mode, see MOCK_* constants above
   const [loading] = useState(false)
   const [period] = useState(MOCK_PERIOD)
@@ -865,6 +869,116 @@ export function Dashboard({ onBack, memberId }) {
     )
   }
 
+  // Calendar tab content — commitments signed in the LL quadrant land here
+  const renderCalendarTab = () => {
+    const LAYER_COLORS = { HOMESTEAD: '#34d399', GUILD: '#818cf8', CELL: '#fbbf24' }
+
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth()
+    const monthLabel = today.toLocaleDateString('en', { month: 'long', year: 'numeric' })
+    const firstDow = new Date(year, month, 1).getDay()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+    const cells = []
+    for (let i = 0; i < firstDow; i++) cells.push(null)
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+    const byDay = {}
+    commitments.forEach(c => {
+      const dt = new Date(c.date)
+      if (dt.getFullYear() === year && dt.getMonth() === month) {
+        const day = dt.getDate()
+        if (!byDay[day]) byDay[day] = []
+        byDay[day].push(c)
+      }
+    })
+
+    const upcoming = [...commitments].sort((a, b) => new Date(a.date) - new Date(b.date))
+
+    return (
+      <div className="calendar-tab">
+        <header className="calendar-header">
+          <h1>📅 Calendar</h1>
+          <p className="calendar-subtitle">
+            Tasks you sign up for in the WE quadrant appear here automatically
+          </p>
+        </header>
+
+        <div className="calendar-layout">
+          {/* Month grid */}
+          <section className="calendar-month">
+            <h2>{monthLabel}</h2>
+            <div className="calendar-grid">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                <div key={d} className="calendar-dow">{d}</div>
+              ))}
+              {cells.map((day, i) => (
+                <div
+                  key={i}
+                  className={`calendar-cell ${day === null ? 'empty' : ''} ${day === today.getDate() ? 'today' : ''}`}
+                >
+                  {day && <span className="cell-day">{day}</span>}
+                  {day && byDay[day]?.map(c => (
+                    <div
+                      key={c.taskId}
+                      className="calendar-chip"
+                      style={{ '--layer-color': LAYER_COLORS[c.layer] || '#888' }}
+                      title={`${c.title} (${c.layer}, ~${c.hours}h)`}
+                    >
+                      {c.title}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="calendar-legend">
+              {Object.entries(LAYER_COLORS).map(([layer, color]) => (
+                <span key={layer} className="legend-entry">
+                  <span className="legend-swatch" style={{ background: color }} />
+                  {layer}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          {/* Upcoming commitments */}
+          <section className="calendar-upcoming">
+            <h2>Your Commitments</h2>
+            {upcoming.length === 0 ? (
+              <p className="calendar-empty">
+                No commitments yet. Open the WE quadrant (lower left) and sign up
+                for a task — it will show up here.
+              </p>
+            ) : (
+              <div className="upcoming-list">
+                {upcoming.map(c => (
+                  <div key={c.taskId} className="upcoming-item" style={{ '--layer-color': LAYER_COLORS[c.layer] || '#888' }}>
+                    <div className="upcoming-date">
+                      <span className="ud-day">{new Date(c.date).getDate()}</span>
+                      <span className="ud-month">{new Date(c.date).toLocaleDateString('en', { month: 'short' })}</span>
+                    </div>
+                    <div className="upcoming-info">
+                      <span className="upcoming-title">{c.title}</span>
+                      <span className="upcoming-meta">{c.layer} · ~{c.hours}h · V = {c.V?.toFixed(1)}</span>
+                    </div>
+                    <button
+                      className="upcoming-remove"
+                      title="Remove from calendar"
+                      onClick={() => removeCommitment(c.taskId)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="dashboard-view">
       {/* Top Bar */}
@@ -1096,12 +1210,7 @@ export function Dashboard({ onBack, memberId }) {
           </div>
         )}
 
-        {activeTab === 'calendar' && (
-          <div className="tab-placeholder">
-            <h2>Calendar</h2>
-            <p>View your schedule and commitments</p>
-          </div>
-        )}
+        {activeTab === 'calendar' && renderCalendarTab()}
 
         {activeTab === 'settings' && (
           <div className="tab-placeholder">
