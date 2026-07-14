@@ -2086,3 +2086,308 @@
   }
 }
 
+
+/* ═══════════════════════════════════════════
+   ECONOMICS - EXCHANGE RATE LINE (post reserve + basic share)
+═══════════════════════════════════════════ */
+
+.exchange-rate-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 8px;
+  font-family: 'Space Mono', monospace;
+}
+
+.exchange-rate-line .rate-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #888);
+}
+
+.exchange-rate-line .rate-formula {
+  font-size: 0.75rem;
+  color: var(--text-light, #e8e4d9);
+}
+
+.exchange-rate-line .rate-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--voluntas, #fbbf24);
+}
+
+/* ═══════════════════════════════════════════
+   ECONOMICS - VOLUNTAS TASK INCENTIVES
+═══════════════════════════════════════════ */
+
+.voluntas-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.voluntas-task {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--text-muted, #888);
+  border-radius: 6px;
+}
+
+.voluntas-task.boost {
+  border-left-color: var(--sympathia, #34d399);
+}
+
+.voluntas-task.damp {
+  border-left-color: var(--labor, #f87171);
+}
+
+.voluntas-task .vt-name {
+  flex: 1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-light, #e8e4d9);
+}
+
+.voluntas-task .vt-note {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted, #888);
+}
+
+.voluntas-task .vt-multiplier {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--voluntas, #fbbf24);
+  min-width: 3.2rem;
+  text-align: right;
+}
+
+.voluntas-task.boost .vt-multiplier {
+  color: var(--sympathia, #34d399);
+}
+
+.voluntas-task.damp .vt-multiplier {
+  color: var(--labor, #f87171);
+}
+
+.voluntas-note {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-muted, #888);
+  margin-top: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Personal avg Voluntas chip in profile */
+.profile-voluntas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 6px;
+}
+
+.profile-voluntas .pv-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #888);
+}
+
+.profile-voluntas .pv-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--voluntas, #fbbf24);
+}
+
+/* Stacked praxion formulas */
+.exchange-formula.praxion-total,
+.exchange-formula.praxion-bonus {
+  margin-top: 0.6rem;
+}
+
+/* ═══════════════════════════════════════════
+   ECONOMICS - WALLET (demo)
+═══════════════════════════════════════════ */
+
+.wallet-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.wallet-card {
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.18), rgba(20, 25, 20, 0.9));
+  border: 1px solid var(--accent-gold-dim, rgba(201, 162, 39, 0.3));
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.wallet-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.wallet-brand {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--accent-gold, #c9a227);
+}
+
+.wallet-period {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted, #888);
+}
+
+.wallet-balance-label {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #888);
+}
+
+.wallet-balance-value {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: var(--text-light, #e8e4d9);
+  margin: 0.25rem 0 1rem;
+}
+
+.wallet-sub-balances {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.wallet-sub {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+}
+
+.wallet-sub .ws-label {
+  color: var(--text-muted, #888);
+}
+
+.wallet-sub .ws-value {
+  color: var(--text-light, #e8e4d9);
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.wallet-btn {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-light, #e8e4d9);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wallet-btn:hover {
+  background: rgba(201, 162, 39, 0.15);
+  border-color: var(--accent-gold-dim, rgba(201, 162, 39, 0.3));
+  color: var(--accent-gold, #c9a227);
+}
+
+.wallet-transactions h3 {
+  margin-top: 0;
+}
+
+.wallet-tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.wallet-tx {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+
+.wallet-tx .tx-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted, #888);
+  min-width: 3.2rem;
+}
+
+.wallet-tx .tx-label {
+  flex: 1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  color: var(--text-light, #e8e4d9);
+}
+
+.wallet-tx .tx-amount {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.wallet-tx .tx-amount.in {
+  color: var(--sympathia, #34d399);
+}
+
+.wallet-tx .tx-amount.out {
+  color: var(--labor, #f87171);
+}
+
+@media (max-width: 768px) {
+  .wallet-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .voluntas-task {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+  }
+
+  .voluntas-task .vt-note {
+    order: 3;
+    width: 100%;
+  }
+}

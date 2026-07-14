@@ -358,32 +358,39 @@ const DevotioBar = ({ label, value }) => (
 )
 
 // Mock economic data — Economics tab runs in shell mode until DB schema is implemented
+//
+// Model: PRAXION is composed of three dimensions (Cognitio, Sympathia, Labor).
+// VOLUNTAS is NOT a dimension of Praxion — it is a per-task multiplier the
+// community sets to incentivize or disincentivize specific jobs.
+// Distribution order: Income → Reserve → Basic Share for everyone → the
+// remainder is the Bonus Pool. Only then is the exchange rate computed
+// (Bonus Pool ÷ total Praxion), and each person's Praxion sets their bonus.
+const MOCK_MEMBER_COUNT = 24
+
 const MOCK_PERIOD = {
   id: 'mock-period-1',
   period_number: 7,
   status: 'closed',
-  weight_cognitive: 0.32,
-  weight_volitional: 0.18,
-  weight_emotional: 0.28,
-  weight_physical: 0.22,
-  total_cognitive: 1200,
-  total_volitional: 2100,
-  total_emotional: 1400,
-  total_physical: 1800,
-  total_surplus: 28000,
+  weight_cognitive: 0.42,
+  weight_emotional: 0.33,
+  weight_physical: 0.25,
+  total_cognitive: 9500,
+  total_emotional: 12200,
+  total_physical: 16100,
+  total_praxion: 25000,
+  basic_share: 700,
+  reserve_ratio: 0.2,
 }
 
 const MOCK_SUMMARY = {
   total_minutes: 2400,
-  weighted_cognitive: 840,
-  weighted_volitional: 360,
-  weighted_emotional: 720,
-  weighted_physical: 480,
+  weighted_cognitive: 960,
+  weighted_emotional: 780,
+  weighted_physical: 660,
+  voluntas_multiplier: 1.12,
   devotio_coefficient: 1.15,
-  exchange_rate: 0.267,
-  actions_earned: 736.92,
-  actions_redeemed: 200,
-  ruban_received: 200,
+  praxion_earned: 1063.4,
+  praxion_accumulated: 350,
 }
 
 const MOCK_DEVOTIO = {
@@ -400,19 +407,34 @@ const MOCK_TREASURY = [
   { movement_type: 'Visitor Sales', amount: 7500 },
 ]
 
+// Voluntas: community-set multipliers to attract or repel labor per task
+const MOCK_VOLUNTAS_TASKS = [
+  { task: 'Night care shifts', multiplier: 1.5, note: 'Chronically understaffed' },
+  { task: 'Compost & sanitation', multiplier: 1.3, note: 'Few volunteers' },
+  { task: 'Kitchen rotation', multiplier: 1.0, note: 'Balanced' },
+  { task: 'Front desk / visitors', multiplier: 0.9, note: 'Slightly oversubscribed' },
+  { task: 'Orchard harvest', multiplier: 0.8, note: 'Everyone wants it' },
+]
+
+const MOCK_WALLET_TRANSACTIONS = [
+  { date: 'Jul 12', label: 'Converted to USD', amount: -200 },
+  { date: 'Jul 09', label: 'Surplus market — vegetables box', amount: -45.5 },
+  { date: 'Jul 01', label: 'Praxion bonus — Period 7', amount: 476.4 },
+  { date: 'Jul 01', label: 'Basic share — Period 7', amount: 700 },
+]
+
 const getWeightInsight = (period) => {
   const weights = [
     { name: 'Cognitio', value: period.weight_cognitive },
-    { name: 'Voluntas', value: period.weight_volitional },
     { name: 'Sympathia', value: period.weight_emotional },
     { name: 'Labor', value: period.weight_physical },
   ]
 
   const sorted = [...weights].sort((a, b) => b.value - a.value)
   const scarcest = sorted[0]
-  const abundant = sorted[3]
+  const abundant = sorted[sorted.length - 1]
 
-  return `${scarcest.name} was scarcest this period (${(scarcest.value * 100).toFixed(1)}% weight), while ${abundant.name} was most abundant (${(abundant.value * 100).toFixed(1)}% weight). Those who contributed ${scarcest.name} get a better exchange rate.`
+  return `${scarcest.name} was scarcest this period (${(scarcest.value * 100).toFixed(1)}% weight), while ${abundant.name} was most abundant (${(abundant.value * 100).toFixed(1)}% weight). Those who contributed ${scarcest.name} earn Praxion faster.`
 }
 
 export function Dashboard({ onBack, memberId }) {
@@ -425,29 +447,41 @@ export function Dashboard({ onBack, memberId }) {
   const [summary, setSummary] = useState(MOCK_SUMMARY)
   const [devotio] = useState(MOCK_DEVOTIO)
   const [treasury] = useState(MOCK_TREASURY)
+  const [walletTransactions, setWalletTransactions] = useState(MOCK_WALLET_TRANSACTIONS)
   const [redeemAmount, setRedeemAmount] = useState('')
   const [redeeming, setRedeeming] = useState(false)
+
+  // Distribution waterfall: rate exists only AFTER reserve + basic shares
+  const ecoIncome = treasury.reduce((s, t) => s + parseFloat(t.amount), 0)
+  const ecoReserve = ecoIncome * period.reserve_ratio
+  const ecoBasicSharePool = period.basic_share * MOCK_MEMBER_COUNT
+  const ecoBonusPool = ecoIncome - ecoReserve - ecoBasicSharePool
+  const ecoExchangeRate = ecoBonusPool / period.total_praxion
+
+  const walletBalance = walletTransactions.reduce((s, t) => s + t.amount, 0)
 
   const handleRedeem = async () => {
     const amount = parseFloat(redeemAmount)
     if (isNaN(amount) || amount <= 0) return
 
-    const available = summary.actions_earned - summary.actions_redeemed
-    if (amount > available) {
-      alert(`Maximum available: ${available.toFixed(2)}`)
+    if (amount > summary.praxion_accumulated) {
+      alert(`Maximum available: ${summary.praxion_accumulated.toFixed(2)} Praxion`)
       return
     }
 
     setRedeeming(true)
-    const rubanReceived = amount
+    const rubanReceived = amount * ecoExchangeRate
     setSummary({
       ...summary,
-      actions_redeemed: summary.actions_redeemed + amount,
-      ruban_received: summary.ruban_received + rubanReceived,
+      praxion_accumulated: summary.praxion_accumulated - amount,
     })
+    setWalletTransactions([
+      { date: 'Today', label: `Redeemed ${amount.toFixed(2)} Praxion stake`, amount: rubanReceived },
+      ...walletTransactions,
+    ])
     setRedeemAmount('')
     setRedeeming(false)
-    alert(`Redeemed ${amount} Actions for ${rubanReceived.toFixed(2)} Ruban Cash (demo)`)
+    alert(`Redeemed ${amount} Praxion for ₽${rubanReceived.toFixed(2)} Ruban Cash (demo)`)
   }
 
   const formatPercent = (value) => (value * 100).toFixed(1) + '%'
@@ -464,16 +498,16 @@ export function Dashboard({ onBack, memberId }) {
       return <div className="eco-empty">No closed periods yet</div>
     }
 
-    const available = summary ? summary.actions_earned - summary.actions_redeemed : 0
-    const totalIncome = treasury.filter(t => t.amount > 0).reduce((s, t) => s + parseFloat(t.amount), 0)
-
     return (
       <div className="eco-content">
 
         {/* Treasury Section */}
         <section className="eco-section eco-treasury">
-          <h2>Treasury</h2>
-          <p className="eco-desc">Funded by surplus production sold at three price tiers: wholesale, local, and visitor.</p>
+          <h2>Treasury &amp; Distribution Order</h2>
+          <p className="eco-desc">
+            Funded by surplus production. Distribution follows a strict order: reserves first,
+            then everyone's basic share, and only the remainder becomes the bonus pool.
+          </p>
           <div className="treasury-flow">
             <div className="treasury-sources">
               {treasury.filter(t => t.amount > 0).map((t, i) => (
@@ -485,19 +519,31 @@ export function Dashboard({ onBack, memberId }) {
             </div>
             <div className="treasury-arrow">→</div>
             <div className="treasury-total">
-              <div className="label">Total Income</div>
-              <div className="value">${formatNumber(totalIncome)}</div>
+              <div className="label">1. Total Income</div>
+              <div className="value">${formatNumber(ecoIncome)}</div>
             </div>
             <div className="treasury-arrow">→</div>
             <div className="treasury-reserve">
-              <div className="label">Reserve (20%)</div>
-              <div className="value negative">-${formatNumber(totalIncome * 0.2)}</div>
+              <div className="label">2. Reserve ({formatPercent(period.reserve_ratio)})</div>
+              <div className="value negative">-${formatNumber(ecoReserve)}</div>
+            </div>
+            <div className="treasury-arrow">→</div>
+            <div className="treasury-reserve">
+              <div className="label">3. Basic Share ({MOCK_MEMBER_COUNT} × ₽{period.basic_share})</div>
+              <div className="value negative">-${formatNumber(ecoBasicSharePool)}</div>
             </div>
             <div className="treasury-arrow">→</div>
             <div className="treasury-surplus">
-              <div className="label">Distributable Surplus</div>
-              <div className="value highlight">${formatNumber(period.total_surplus)}</div>
+              <div className="label">4. Bonus Pool</div>
+              <div className="value highlight">${formatNumber(ecoBonusPool)}</div>
             </div>
+          </div>
+          <div className="exchange-rate-line">
+            <span className="rate-label">Exchange rate (computed only after steps 2 &amp; 3):</span>
+            <span className="rate-formula">
+              Bonus Pool ÷ Total Praxion = ${formatNumber(ecoBonusPool)} ÷ {formatNumber(period.total_praxion, 0)} =
+            </span>
+            <span className="rate-value">₽{formatNumber(ecoExchangeRate, 3)} / Praxion</span>
           </div>
         </section>
 
@@ -522,17 +568,40 @@ export function Dashboard({ onBack, memberId }) {
           </p>
         </section>
 
+        {/* Voluntas Section — task incentive multipliers, NOT a Praxion dimension */}
+        <section className="eco-section eco-voluntas">
+          <h2>Voluntas — Task Incentives</h2>
+          <p className="eco-desc">
+            Voluntas is not a component of Praxion. It is a multiplier the community sets per
+            job to incentivize understaffed tasks and disincentivize oversubscribed ones.
+          </p>
+          <div className="voluntas-tasks">
+            {MOCK_VOLUNTAS_TASKS.map((t) => (
+              <div key={t.task} className={`voluntas-task ${t.multiplier > 1 ? 'boost' : t.multiplier < 1 ? 'damp' : 'neutral'}`}>
+                <span className="vt-name">{t.task}</span>
+                <span className="vt-note">{t.note}</span>
+                <span className="vt-multiplier">×{t.multiplier.toFixed(1)}</span>
+              </div>
+            ))}
+          </div>
+          <p className="voluntas-note">
+            Praxion earned on a task is multiplied by its Voluntas. Multipliers are revised
+            each period as sign-ups rebalance.
+          </p>
+        </section>
+
         {/* Emergent Weights Section */}
         <section className="eco-section eco-weights">
-          <h2>Emergent Weights</h2>
-          <p className="eco-desc">Scarcity determines value. Less abundant = higher weight.</p>
+          <h2>Emergent Weights — Praxion Dimensions</h2>
+          <p className="eco-desc">
+            Praxion is composed of three dimensions. Scarcity determines value: less abundant = higher weight.
+          </p>
           {(() => {
-            const totalAction = (period.total_cognitive || 0) + (period.total_volitional || 0) +
+            const totalAction = (period.total_cognitive || 0) +
                                (period.total_emotional || 0) + (period.total_physical || 0)
-            const cognitioPercent = totalAction > 0 ? ((period.total_cognitive || 0) / totalAction) * 100 : 25
-            const voluntasPercent = totalAction > 0 ? ((period.total_volitional || 0) / totalAction) * 100 : 25
-            const sympathiaPercent = totalAction > 0 ? ((period.total_emotional || 0) / totalAction) * 100 : 25
-            const laborPercent = totalAction > 0 ? ((period.total_physical || 0) / totalAction) * 100 : 25
+            const cognitioPercent = totalAction > 0 ? ((period.total_cognitive || 0) / totalAction) * 100 : 33.3
+            const sympathiaPercent = totalAction > 0 ? ((period.total_emotional || 0) / totalAction) * 100 : 33.3
+            const laborPercent = totalAction > 0 ? ((period.total_physical || 0) / totalAction) * 100 : 33.3
 
             return (
               <div className="weights-grid dual">
@@ -541,12 +610,6 @@ export function Dashboard({ onBack, memberId }) {
                   actionPercent={cognitioPercent}
                   weight={period.weight_cognitive}
                   color="var(--cognitio)"
-                />
-                <DualWeightBar
-                  label="Voluntas"
-                  actionPercent={voluntasPercent}
-                  weight={period.weight_volitional}
-                  color="var(--voluntas)"
                 />
                 <DualWeightBar
                   label="Sympathia"
@@ -583,11 +646,6 @@ export function Dashboard({ onBack, memberId }) {
                     color="var(--cognitio)"
                   />
                   <ActioBar
-                    label="V"
-                    value={summary.weighted_volitional / summary.total_minutes}
-                    color="var(--voluntas)"
-                  />
-                  <ActioBar
                     label="S"
                     value={summary.weighted_emotional / summary.total_minutes}
                     color="var(--sympathia)"
@@ -597,6 +655,10 @@ export function Dashboard({ onBack, memberId }) {
                     value={summary.weighted_physical / summary.total_minutes}
                     color="var(--labor)"
                   />
+                </div>
+                <div className="profile-voluntas">
+                  <span className="pv-label">Avg. Voluntas on your tasks</span>
+                  <span className="pv-value">×{formatNumber(summary.voluntas_multiplier, 2)}</span>
                 </div>
               </div>
 
@@ -617,106 +679,147 @@ export function Dashboard({ onBack, memberId }) {
           </section>
         )}
 
-        {/* Exchange Rate Section */}
-        {summary && (
-          <section className="eco-section eco-exchange">
-            <h2>Personal Exchange Rate</h2>
-            <div className="exchange-formula">
-              <span className="formula-part" style={{color: 'var(--cognitio)'}}>
-                {formatPercent(summary.weighted_cognitive / summary.total_minutes)} × {formatNumber(period.weight_cognitive, 3)}
-              </span>
-              <span className="formula-op">+</span>
-              <span className="formula-part" style={{color: 'var(--voluntas)'}}>
-                {formatPercent(summary.weighted_volitional / summary.total_minutes)} × {formatNumber(period.weight_volitional, 3)}
-              </span>
-              <span className="formula-op">+</span>
-              <span className="formula-part" style={{color: 'var(--sympathia)'}}>
-                {formatPercent(summary.weighted_emotional / summary.total_minutes)} × {formatNumber(period.weight_emotional, 3)}
-              </span>
-              <span className="formula-op">+</span>
-              <span className="formula-part" style={{color: 'var(--labor)'}}>
-                {formatPercent(summary.weighted_physical / summary.total_minutes)} × {formatNumber(period.weight_physical, 3)}
-              </span>
-              <span className="formula-op">=</span>
-              <span className="formula-result">{formatNumber(summary.exchange_rate, 4)}</span>
-            </div>
-            <p className="exchange-insight">
-              Your exchange rate of {formatNumber(summary.exchange_rate, 4)} means each minute worked
-              converts to {formatNumber(summary.exchange_rate, 4)} Actions before DEVOTIO.
-              {summary.exchange_rate > 0.3
-                ? ' Your work aligns well with scarce dimensions.'
-                : summary.exchange_rate < 0.2
-                  ? ' Your work is concentrated in abundant dimensions.'
-                  : ' Your work is distributed across dimensions.'}
-            </p>
-          </section>
-        )}
+        {/* Praxion & Bonus Section */}
+        {summary && (() => {
+          const praxionRate =
+            (summary.weighted_cognitive / summary.total_minutes) * period.weight_cognitive +
+            (summary.weighted_emotional / summary.total_minutes) * period.weight_emotional +
+            (summary.weighted_physical / summary.total_minutes) * period.weight_physical
+          const personalBonus = summary.praxion_earned * ecoExchangeRate
 
-        {/* Actions & Ruban Section */}
-        {summary && (
-          <section className="eco-section eco-actions">
-            <h2>Actions & Ruban Cash</h2>
-            <div className="actions-grid">
-              <div className="action-card">
-                <div className="card-label">Actions Earned</div>
-                <div className="card-value">{formatNumber(summary.actions_earned)}</div>
-                <div className="card-formula">
-                  {summary.total_minutes} min × {formatNumber(summary.exchange_rate, 4)} × {formatNumber(summary.devotio_coefficient)}
-                </div>
-              </div>
-              <div className="action-card">
-                <div className="card-label">Actions Redeemed</div>
-                <div className="card-value redeemed">{formatNumber(summary.actions_redeemed)}</div>
-              </div>
-              <div className="action-card">
-                <div className="card-label">Actions Accumulated</div>
-                <div className="card-value accumulated">{formatNumber(available)}</div>
-                <div className="card-note">Future stake</div>
-              </div>
-              <div className="action-card highlight">
-                <div className="card-label">Ruban Cash Received</div>
-                <div className="card-value ruban">₽ {formatNumber(summary.ruban_received)}</div>
-              </div>
-            </div>
-
-            {/* What Ruban is for */}
-            <div className="ruban-uses">
-              <h3>What is Ruban Cash for?</h3>
-              <div className="uses-grid">
-                <div className="use-item">
-                  <span className="use-icon">📦</span>
-                  <span className="use-text">Buy <strong>surplus production</strong> beyond your Cornucopia allotment</span>
-                </div>
-                <div className="use-item">
-                  <span className="use-icon">💵</span>
-                  <span className="use-text">Convert to <strong>USD</strong> for spending outside the local economy</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Redemption UI */}
-            <div className="redeem-section">
-              <h3>Redeem or Accumulate</h3>
-              <p className="redeem-desc">
-                Convert Actions to Ruban Cash now, or keep accumulating for a larger future stake in the community.
+          return (
+            <section className="eco-section eco-exchange">
+              <h2>Your Praxion &amp; Bonus</h2>
+              <p className="eco-desc">
+                Praxion measures your weighted contribution. It does not set the pool —
+                it determines your share of the bonus after basic shares are paid.
               </p>
-              <div className="redeem-form">
-                <input
-                  type="number"
-                  placeholder="Actions to redeem"
-                  value={redeemAmount}
-                  onChange={(e) => setRedeemAmount(e.target.value)}
-                  max={available}
-                  step="0.01"
-                />
-                <span className="available">Available: {formatNumber(available)}</span>
-                <button
-                  onClick={handleRedeem}
-                  disabled={redeeming || !redeemAmount}
-                  className="redeem-btn"
-                >
-                  {redeeming ? 'Processing...' : 'Redeem'}
-                </button>
+              <div className="exchange-formula">
+                <span className="formula-part" style={{color: 'var(--cognitio)'}}>
+                  {formatPercent(summary.weighted_cognitive / summary.total_minutes)} × {formatNumber(period.weight_cognitive, 3)}
+                </span>
+                <span className="formula-op">+</span>
+                <span className="formula-part" style={{color: 'var(--sympathia)'}}>
+                  {formatPercent(summary.weighted_emotional / summary.total_minutes)} × {formatNumber(period.weight_emotional, 3)}
+                </span>
+                <span className="formula-op">+</span>
+                <span className="formula-part" style={{color: 'var(--labor)'}}>
+                  {formatPercent(summary.weighted_physical / summary.total_minutes)} × {formatNumber(period.weight_physical, 3)}
+                </span>
+                <span className="formula-op">=</span>
+                <span className="formula-result">{formatNumber(praxionRate, 3)} Praxion/min</span>
+              </div>
+              <div className="exchange-formula praxion-total">
+                <span className="formula-part">{summary.total_minutes} min</span>
+                <span className="formula-op">×</span>
+                <span className="formula-part">{formatNumber(praxionRate, 3)}</span>
+                <span className="formula-op">×</span>
+                <span className="formula-part" style={{color: 'var(--voluntas)'}}>
+                  {formatNumber(summary.voluntas_multiplier, 2)} Voluntas
+                </span>
+                <span className="formula-op">×</span>
+                <span className="formula-part">{formatNumber(summary.devotio_coefficient, 2)} DEVOTIO</span>
+                <span className="formula-op">=</span>
+                <span className="formula-result">{formatNumber(summary.praxion_earned)} Praxion</span>
+              </div>
+              <div className="exchange-formula praxion-bonus">
+                <span className="formula-part">{formatNumber(summary.praxion_earned)} Praxion</span>
+                <span className="formula-op">×</span>
+                <span className="formula-part">₽{formatNumber(ecoExchangeRate, 3)}</span>
+                <span className="formula-op">=</span>
+                <span className="formula-result">₽{formatNumber(personalBonus)} bonus</span>
+              </div>
+              <p className="exchange-insight">
+                Your basic share of ₽{formatNumber(period.basic_share)} is unconditional. Your
+                {' '}{formatNumber(summary.praxion_earned)} Praxion converted to a
+                {' '}₽{formatNumber(personalBonus)} bonus at this period's rate.
+              </p>
+            </section>
+          )
+        })()}
+
+        {/* Wallet Section (demo) */}
+        {summary && (
+          <section className="eco-section eco-wallet">
+            <h2>Wallet</h2>
+            <p className="eco-desc">Demo preview — balances and movements are illustrative.</p>
+
+            <div className="wallet-layout">
+              {/* Balance card */}
+              <div className="wallet-card">
+                <div className="wallet-card-header">
+                  <span className="wallet-brand">RUBAN</span>
+                  <span className="wallet-period">Period {period.period_number}</span>
+                </div>
+                <div className="wallet-balance">
+                  <span className="wallet-balance-label">Available balance</span>
+                  <span className="wallet-balance-value">₽ {formatNumber(walletBalance)}</span>
+                </div>
+                <div className="wallet-sub-balances">
+                  <div className="wallet-sub">
+                    <span className="ws-label">Basic share</span>
+                    <span className="ws-value">₽ {formatNumber(period.basic_share)}</span>
+                  </div>
+                  <div className="wallet-sub">
+                    <span className="ws-label">Praxion bonus</span>
+                    <span className="ws-value">₽ {formatNumber(summary.praxion_earned * ecoExchangeRate)}</span>
+                  </div>
+                  <div className="wallet-sub">
+                    <span className="ws-label">Praxion stake</span>
+                    <span className="ws-value">{formatNumber(summary.praxion_accumulated)} ⚡</span>
+                  </div>
+                </div>
+                <div className="wallet-actions">
+                  <button className="wallet-btn" onClick={() => alert('Demo: buy surplus production with Ruban Cash')}>
+                    📦 Buy surplus
+                  </button>
+                  <button className="wallet-btn" onClick={() => alert('Demo: convert Ruban Cash to USD')}>
+                    💵 To USD
+                  </button>
+                </div>
+              </div>
+
+              {/* Transactions */}
+              <div className="wallet-transactions">
+                <h3>Movements</h3>
+                <div className="wallet-tx-list">
+                  {walletTransactions.map((tx, i) => (
+                    <div key={i} className="wallet-tx">
+                      <span className="tx-date">{tx.date}</span>
+                      <span className="tx-label">{tx.label}</span>
+                      <span className={`tx-amount ${tx.amount >= 0 ? 'in' : 'out'}`}>
+                        {tx.amount >= 0 ? '+' : '−'}₽{formatNumber(Math.abs(tx.amount))}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Redeem accumulated Praxion stake */}
+                <div className="redeem-section">
+                  <h3>Redeem Praxion Stake</h3>
+                  <p className="redeem-desc">
+                    Convert accumulated Praxion to Ruban Cash at this period's rate
+                    (₽{formatNumber(ecoExchangeRate, 3)}), or keep it as a future stake.
+                  </p>
+                  <div className="redeem-form">
+                    <input
+                      type="number"
+                      placeholder="Praxion to redeem"
+                      value={redeemAmount}
+                      onChange={(e) => setRedeemAmount(e.target.value)}
+                      max={summary.praxion_accumulated}
+                      step="0.01"
+                    />
+                    <span className="available">Available: {formatNumber(summary.praxion_accumulated)}</span>
+                    <button
+                      onClick={handleRedeem}
+                      disabled={redeeming || !redeemAmount}
+                      className="redeem-btn"
+                    >
+                      {redeeming ? 'Processing...' : 'Redeem'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
