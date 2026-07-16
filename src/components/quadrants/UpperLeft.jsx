@@ -47,7 +47,7 @@ const LAYER_INFO = {
     canCreate: true,
     canEdit: false, // Only medical professionals
     canDelete: false,
-    description: 'Condiciones físicas. Requiere validación médica.'
+    description: 'Physical conditions. Requires medical validation.'
   },
   skills: {
     label: 'Facultates',
@@ -57,7 +57,7 @@ const LAYER_INFO = {
     canCreate: true,
     canEdit: true,
     canDelete: true,
-    description: 'Habilidades y conocimientos que deseas adquirir.'
+    description: 'Skills and knowledge you want to acquire.'
   },
   perception: {
     label: 'Fama',
@@ -67,7 +67,7 @@ const LAYER_INFO = {
     canCreate: false, // Others add these
     canEdit: false,
     canDelete: false,
-    description: 'Percepciones que otros han dejado sobre ti.'
+    description: 'Perceptions others have left about you.'
   }
 }
 
@@ -223,7 +223,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
     if (!LAYER_INFO[currentLayer].canCreate) {
       e.preventDefault()
       if (currentLayer === 'perception') {
-        onShowInfo?.('Las percepciones las dejan otros usuarios sobre ti')
+        onShowInfo?.('Perceptions are left about you by other users')
       }
       return
     }
@@ -282,9 +282,9 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
 
       const layerLabel = LAYER_INFO[addItemBubble.layer].label
       if (addItemBubble.layer === 'health') {
-        onShowInfo?.(`${layerLabel}: "${newItemLabel}" creado. Pendiente validación médica.`)
+        onShowInfo?.(`${layerLabel}: "${newItemLabel}" created. Pending medical validation.`)
       } else {
-        onShowInfo?.(`${layerLabel}: "${newItemLabel}" agregado`)
+        onShowInfo?.(`${layerLabel}: "${newItemLabel}" added`)
       }
     } catch (err) {
       console.error('Error saving being:', err)
@@ -301,7 +301,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
         is_validated: false
       }
       setBeings(prev => [...prev, localItem])
-      onShowInfo?.(`${LAYER_INFO[addItemBubble.layer].label}: "${newItemLabel}" agregado (local)`)
+      onShowInfo?.(`${LAYER_INFO[addItemBubble.layer].label}: "${newItemLabel}" added (local)`)
     } finally {
       setSaving(false)
       setAddItemBubble(null)
@@ -314,7 +314,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
   const handleSaveEditItem = useCallback(async () => {
     if (!newItemLabel.trim() || !editItemBubble) return
     if (!canEditInLayer(editItemBubble.layer)) {
-      onShowInfo?.('No tienes permisos para editar este elemento')
+      onShowInfo?.('You do not have permission to edit this item')
       return
     }
 
@@ -338,7 +338,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
           ? { ...item, ...updates }
           : item
       ))
-      onShowInfo?.(`Actualizado: "${newItemLabel}"`)
+      onShowInfo?.(`Updated: "${newItemLabel}"`)
     } catch (err) {
       console.error('Error updating being:', err)
       // Fallback: update local state anyway
@@ -347,7 +347,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
           ? { ...item, label: newItemLabel.trim(), description: newItemDescription.trim(), value: newItemValue }
           : item
       ))
-      onShowInfo?.(`Actualizado: "${newItemLabel}" (local)`)
+      onShowInfo?.(`Updated: "${newItemLabel}" (local)`)
     } finally {
       setSaving(false)
       setEditItemBubble(null)
@@ -360,11 +360,11 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
   const handleDeleteItem = useCallback(async () => {
     if (!editItemBubble) return
     if (!canDeleteInLayer(editItemBubble.layer)) {
-      onShowInfo?.('No tienes permisos para eliminar este elemento')
+      onShowInfo?.('You do not have permission to delete this item')
       return
     }
 
-    if (!confirm(`¿Eliminar "${editItemBubble.label}"?`)) return
+    if (!confirm(`Delete "${editItemBubble.label}"?`)) return
 
     setSaving(true)
     try {
@@ -376,12 +376,12 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
       if (error) throw error
 
       setBeings(prev => prev.filter(item => item.id !== editItemBubble.id))
-      onShowInfo?.('Elemento eliminado')
+      onShowInfo?.('Item deleted')
     } catch (err) {
       console.error('Error deleting being:', err)
       // Fallback: delete from local state anyway
       setBeings(prev => prev.filter(item => item.id !== editItemBubble.id))
-      onShowInfo?.('Elemento eliminado (local)')
+      onShowInfo?.('Item deleted (local)')
     } finally {
       setSaving(false)
       setEditItemBubble(null)
@@ -393,7 +393,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
     const file = e.target.files?.[0]
     if (!file || !selectedItem || selectedItem.layer !== 'health') return
 
-    onShowInfo?.(`Subiendo ${file.name}...`)
+    onShowInfo?.(`Uploading ${file.name}...`)
 
     try {
       // Upload to Supabase Storage
@@ -424,10 +424,10 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
 
       if (dbError) throw dbError
 
-      onShowInfo?.(`Archivo "${file.name}" adjuntado correctamente`)
+      onShowInfo?.(`File "${file.name}" attached successfully`)
     } catch (err) {
       console.error('Error uploading file:', err)
-      onShowInfo?.(`Error al subir archivo: ${err.message}`)
+      onShowInfo?.(`Error uploading file: ${err.message}`)
     }
 
     // Reset file input
@@ -524,7 +524,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
       <div className={`quadrant quadrant-ul ${expanded ? 'expanded' : ''}`}>
         <span className="quadrant-label">I</span>
         <div className="quadrant-content">
-          <div className="loading">Cargando...</div>
+          <div className="loading">Loading...</div>
         </div>
       </div>
     )
@@ -561,7 +561,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             <div
               className="vitruvian-center"
               onClick={handleCenterClick}
-              title="Ver contactos"
+              title="View contacts"
             />
 
             {/* Health items */}
@@ -585,7 +585,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
                 {(hoveredItem?.id === item.id && hoveredItem?.layer === 'health') && (
                   <span className="item-tooltip">
                     {item.label}
-                    {!item.is_validated && <small className="validation-hint"> (pendiente validación)</small>}
+                    {!item.is_validated && <small className="validation-hint"> (pending validation)</small>}
                   </span>
                 )}
               </div>
@@ -664,18 +664,18 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
                   {selectedItem.is_validated ? (
                     <>
                       <span className="status-icon">✓</span>
-                      <span>Validado {selectedItem.validated_at && `el ${new Date(selectedItem.validated_at).toLocaleDateString()}`}</span>
+                      <span>Validated {selectedItem.validated_at && `on ${new Date(selectedItem.validated_at).toLocaleDateString()}`}</span>
                     </>
                   ) : (
                     <>
                       <span className="status-icon">⏳</span>
-                      <span>Pendiente validación médica</span>
+                      <span>Pending medical validation</span>
                     </>
                   )}
                 </div>
 
                 <div className="severity-bar">
-                  <span>Severidad:</span>
+                  <span>Severity:</span>
                   <div className="severity-track">
                     <div
                       className="severity-fill"
@@ -697,11 +697,11 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
                   className="btn-attach"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  📎 Adjuntar archivo (estudio, imagen, lab...)
+                  📎 Attach file (study, image, lab...)
                 </button>
 
                 <p className="permission-note">
-                  Solo un profesional médico puede modificar o eliminar este registro.
+                  Only a medical professional can modify or delete this record.
                 </p>
               </>
             )}
@@ -712,7 +712,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
                   <span className="bubble-icon">★</span> {selectedItem.label}
                 </h3>
                 <div className="level-bar">
-                  <span>Interés:</span>
+                  <span>Interest:</span>
                   <div className="level-track">
                     <div
                       className="level-fill"
@@ -736,7 +736,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
                   "{selectedItem.description}"
                 </blockquote>
                 <p className="permission-note">
-                  Las percepciones son dejadas por otros miembros y no pueden ser editadas.
+                  Perceptions are left by other members and cannot be edited.
                 </p>
               </>
             )}
@@ -752,29 +752,29 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             <button className="bubble-close" onClick={() => setAddItemBubble(null)}>×</button>
             <h3 style={{ color: LAYER_INFO[addItemBubble.layer].color }}>
               <span className="bubble-icon">{LAYER_INFO[addItemBubble.layer].icon}</span>
-              {addItemBubble.layer === 'health' ? 'Nueva Condición' : 'Nuevo Deseo de Aprendizaje'}
+              {addItemBubble.layer === 'health' ? 'New Condition' : 'New Learning Goal'}
             </h3>
 
             {addItemBubble.layer === 'health' && (
               <p className="form-note">
-                Este registro requerirá validación de un profesional médico.
+                This record will require validation by a medical professional.
               </p>
             )}
 
             <div className="form-group">
-              <label>Nombre</label>
+              <label>Name</label>
               <input
                 ref={inputRef}
                 type="text"
                 value={newItemLabel}
                 onChange={(e) => setNewItemLabel(e.target.value)}
-                placeholder={addItemBubble.layer === 'health' ? 'Ej: Alergia, Dolor...' : 'Ej: Python, Diseño...'}
+                placeholder={addItemBubble.layer === 'health' ? 'E.g.: Allergy, Pain...' : 'E.g.: Python, Design...'}
                 disabled={saving}
               />
             </div>
 
             <div className="form-group">
-              <label>{addItemBubble.layer === 'health' ? 'Severidad' : 'Nivel de interés'}: {newItemValue}/5</label>
+              <label>{addItemBubble.layer === 'health' ? 'Severity' : 'Interest level'}: {newItemValue}/5</label>
               <input
                 type="range"
                 min="1"
@@ -788,22 +788,22 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             </div>
 
             <div className="form-group">
-              <label>Descripción</label>
+              <label>Description</label>
               <textarea
                 value={newItemDescription}
                 onChange={(e) => setNewItemDescription(e.target.value)}
                 placeholder={addItemBubble.layer === 'health'
-                  ? 'Describe la condición, síntomas, etc...'
-                  : 'Por qué quieres aprender esto...'}
+                  ? 'Describe the condition, symptoms, etc...'
+                  : 'Why you want to learn this...'}
                 rows={2}
                 disabled={saving}
               />
             </div>
 
             <div className="form-actions">
-              <button className="btn-cancel" onClick={() => setAddItemBubble(null)} disabled={saving}>Cancelar</button>
+              <button className="btn-cancel" onClick={() => setAddItemBubble(null)} disabled={saving}>Cancel</button>
               <button className="btn-save" onClick={handleSaveNewItem} disabled={!newItemLabel.trim() || saving}>
-                {saving ? 'Guardando...' : 'Guardar'}
+                {saving ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
@@ -818,11 +818,11 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             <button className="bubble-close" onClick={() => setEditItemBubble(null)}>×</button>
             <h3 style={{ color: LAYER_INFO[editItemBubble.layer].color }}>
               <span className="bubble-icon">{LAYER_INFO[editItemBubble.layer].icon}</span>
-              Editar
+              Edit
             </h3>
 
             <div className="form-group">
-              <label>Nombre</label>
+              <label>Name</label>
               <input
                 ref={inputRef}
                 type="text"
@@ -833,7 +833,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             </div>
 
             <div className="form-group">
-              <label>Nivel de interés: {newItemValue}/5</label>
+              <label>Interest level: {newItemValue}/5</label>
               <input
                 type="range"
                 min="1"
@@ -847,7 +847,7 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             </div>
 
             <div className="form-group">
-              <label>Descripción</label>
+              <label>Description</label>
               <textarea
                 value={newItemDescription}
                 onChange={(e) => setNewItemDescription(e.target.value)}
@@ -857,10 +857,10 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
             </div>
 
             <div className="form-actions">
-              <button className="btn-delete" onClick={handleDeleteItem} disabled={saving}>Eliminar</button>
-              <button className="btn-cancel" onClick={() => setEditItemBubble(null)} disabled={saving}>Cancelar</button>
+              <button className="btn-delete" onClick={handleDeleteItem} disabled={saving}>Delete</button>
+              <button className="btn-cancel" onClick={() => setEditItemBubble(null)} disabled={saving}>Cancel</button>
               <button className="btn-save" onClick={handleSaveEditItem} disabled={!newItemLabel.trim() || saving}>
-                {saving ? 'Guardando...' : 'Guardar'}
+                {saving ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
@@ -873,8 +873,8 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
         <div className="item-bubble" onClick={(e) => { e.stopPropagation(); setContactsList(null); }}>
           <div className="bubble-content contacts-bubble" onClick={(e) => e.stopPropagation()}>
             <button className="bubble-close" onClick={() => setContactsList(null)}>×</button>
-            <h3>Contactos</h3>
-            <p className="bubble-subtitle">Personas con las que has interactuado</p>
+            <h3>Contacts</h3>
+            <p className="bubble-subtitle">People you have interacted with</p>
 
             <div className="contacts-list">
               {contactsList.map((contact) => (
@@ -882,14 +882,14 @@ export function UpperLeft({ onNavigate, onShowInfo, onExpand, expanded, userId, 
                   key={contact.id}
                   className="contact-item"
                   onClick={() => {
-                    onShowInfo?.(`Abriendo perfil de ${contact.name}...`)
+                    onShowInfo?.(`Opening ${contact.name}'s profile...`)
                     setContactsList(null)
                   }}
                 >
                   <div className="contact-avatar">{contact.name.charAt(0)}</div>
                   <div className="contact-info">
                     <span className="contact-name">{contact.name}</span>
-                    <span className="contact-date">Última interacción: {contact.lastInteraction}</span>
+                    <span className="contact-date">Last interaction: {contact.lastInteraction}</span>
                   </div>
                   <span className="contact-arrow">→</span>
                 </div>

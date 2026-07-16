@@ -30,10 +30,10 @@ function App() {
 
   const handleNavigate = useCallback((destination) => {
     const pageNames = {
-      'identity-layers': 'UL: Capas de Identidad — Identity, Avatars, Roles, Tasks',
-      'issues-cloud': 'UR: Nube de Issues — Topics → Issues → Argument Maps',
-      'contributions': 'LL: Contribuciones — Dar & Recibir, Issues Cloud, Repository',
-      'cell-canvas': 'LR: Vista de Célula — Infraestructura, Guild Kernel, Compounds'
+      'identity-layers': 'UL: Identity Layers — Identity, Avatars, Roles, Tasks',
+      'issues-cloud': 'UR: Issues Cloud — Topics → Issues → Argument Maps',
+      'contributions': 'LL: Contributions — Give & Receive, Issues Cloud, Repository',
+      'cell-canvas': 'LR: Cell View — Infrastructure, Guild Kernel, Compounds'
     }
     showInfo(pageNames[destination] || destination)
   }, [showInfo])

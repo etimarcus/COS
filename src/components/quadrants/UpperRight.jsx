@@ -30,7 +30,7 @@ const DEFAULT_MINISTRY = { name: 'Uncategorized', color: '#9E9E9E' }
 // Demo words live only in the client (not in Supabase) - ids prefixed 'demo-'
 const isDemoWord = (id) => String(id).startsWith('demo-')
 
-// Inject the "Leyes y Reglamentos" demo branch (community narratives) into the map
+// Inject the "Laws & Regulations" demo branch (community narratives) into the map
 const injectDemoBranch = (map) => {
   map[DEMO_BRANCH.id] = {
     id: DEMO_BRANCH.id,
@@ -323,25 +323,25 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
       // Return sample data for demo
       const sampleIssues = {
         'democracy': [
-          { id: '1', title: 'Representación vs Participación Directa', description: 'Debate sobre el balance entre democracia representativa y participativa', status: 'deliberating', urgency_level: 4 },
-          { id: '2', title: 'Voto Electrónico', description: 'Seguridad y transparencia en sistemas de votación digital', status: 'open', urgency_level: 3 }
+          { id: '1', title: 'Representation vs Direct Participation', description: 'Debate over the balance between representative and participatory democracy', status: 'deliberating', urgency_level: 4 },
+          { id: '2', title: 'Electronic Voting', description: 'Security and transparency in digital voting systems', status: 'open', urgency_level: 3 }
         ],
         'economy': [
-          { id: '3', title: 'Distribución de Recursos', description: 'Criterios para asignación equitativa de recursos comunitarios', status: 'open', urgency_level: 5 }
+          { id: '3', title: 'Resource Distribution', description: 'Criteria for equitable allocation of community resources', status: 'open', urgency_level: 5 }
         ],
         'education': [
-          { id: '4', title: 'Acceso Universal', description: 'Garantizar educación de calidad para todos los miembros', status: 'deliberating', urgency_level: 4 }
+          { id: '4', title: 'Universal Access', description: 'Guaranteeing quality education for all members', status: 'deliberating', urgency_level: 4 }
         ],
         'farm-loans': [
-          { id: '5', title: 'Criterios para Préstamos Agrícolas', description: '¿Bajo qué condiciones la comunidad debe otorgar préstamos a proyectos agrícolas? Tasas, plazos, garantías y priorización.', status: 'deliberating', urgency_level: 4 },
-          { id: '6', title: 'Gestión del Riesgo en Préstamos', description: '¿Cómo manejar el riesgo de impago considerando factores climáticos y de mercado?', status: 'open', urgency_level: 3 },
-          { id: '7', title: 'Requisitos Ambientales', description: '¿Deben los préstamos condicionarse a prácticas sustentables? Orgánico vs. convencional.', status: 'open', urgency_level: 3 }
+          { id: '5', title: 'Criteria for Farm Loans', description: 'Under what conditions should the community grant loans to agricultural projects? Rates, terms, collateral, and prioritization.', status: 'deliberating', urgency_level: 4 },
+          { id: '6', title: 'Loan Risk Management', description: 'How should default risk be managed given climate and market factors?', status: 'open', urgency_level: 3 },
+          { id: '7', title: 'Environmental Requirements', description: 'Should loans be conditional on sustainable practices? Organic vs. conventional.', status: 'open', urgency_level: 3 }
         ],
         'agriculture': [
-          { id: '5', title: 'Criterios para Préstamos Agrícolas', description: '¿Bajo qué condiciones la comunidad debe otorgar préstamos a proyectos agrícolas?', status: 'deliberating', urgency_level: 4 }
+          { id: '5', title: 'Criteria for Farm Loans', description: 'Under what conditions should the community grant loans to agricultural projects?', status: 'deliberating', urgency_level: 4 }
         ],
         'sustainability': [
-          { id: '7', title: 'Requisitos Ambientales para Financiamiento', description: '¿Deben los préstamos agrícolas condicionarse a prácticas sustentables?', status: 'open', urgency_level: 3 }
+          { id: '7', title: 'Environmental Requirements for Financing', description: 'Should farm loans be conditional on sustainable practices?', status: 'open', urgency_level: 3 }
         ]
       }
       return sampleIssues[word.toLowerCase()] || []
@@ -1074,7 +1074,7 @@ export function UpperRight({ onNavigate, onShowInfo, onExpand, expanded }) {
             <p className="bubble-subtitle">
               {addWordParent
                 ? `child of "${addWordParent.text}"`
-                : `en "${wordsMap[currentNodeId]?.label || 'topics'}"`
+                : `in "${wordsMap[currentNodeId]?.label || 'topics'}"`
               }
             </p>
 

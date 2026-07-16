@@ -14,37 +14,37 @@ import './LowerRight.css'
 
 // Layer definitions
 const LAYERS = [
-  { id: 'normal', label: 'STATUS', icon: '', description: 'Vista estándar de la célula' },
-  { id: 'urgency', label: 'CRISIS MAP', icon: '', description: 'Demanda por sector (Verde/Amarillo/Rojo)' },
-  { id: 'activity', label: 'TEAMS', icon: '', description: 'Trabajo activo en cada zona' },
+  { id: 'normal', label: 'STATUS', icon: '', description: 'Standard cell view' },
+  { id: 'urgency', label: 'CRISIS MAP', icon: '', description: 'Demand by sector (Green/Yellow/Red)' },
+  { id: 'activity', label: 'TEAMS', icon: '', description: 'Active work in each zone' },
 ]
 
 // Mock data for sector info - will come from database
 const MOCK_SECTOR_DATA = {
   school: {
     name: 'Earth School',
-    currentClass: 'Permacultura Avanzada',
+    currentClass: 'Advanced Permaculture',
     teacher: 'María González',
     students: 24,
-    nextClass: 'Construcción Natural (14:00)',
+    nextClass: 'Natural Building (14:00)',
     alerts: [],
   },
   guild: {
-    1: { name: 'Guild Norte', tasks: ['Cosecha de tomates', 'Riego sector A'], workshop: 'Carpintería - Mesa comunitaria', people: 12, alerts: ['Necesitamos 2 personas para cosecha'] },
-    2: { name: 'Guild Noreste', tasks: ['Mantenimiento invernadero'], workshop: 'Herrería - Herramientas', people: 8, alerts: [] },
-    3: { name: 'Guild Este', tasks: ['Poda de frutales', 'Compostaje'], workshop: 'Cerámica - Vasijas', people: 15, alerts: ['Urgente: Plaga detectada en manzanos'] },
-    4: { name: 'Guild Sureste', tasks: ['Preparación de suelo'], workshop: 'Textil - Mantas', people: 10, alerts: [] },
-    5: { name: 'Guild Sur', tasks: ['Siembra de lechuga', 'Cosecha de zanahorias'], workshop: 'Panadería - Pan integral', people: 14, alerts: ['Se necesita harina'] },
-    6: { name: 'Guild Suroeste', tasks: ['Riego general'], workshop: 'Lácteos - Queso fresco', people: 9, alerts: [] },
-    7: { name: 'Guild Oeste', tasks: ['Mantenimiento canales'], workshop: 'Conservas - Mermeladas', people: 11, alerts: [] },
-    8: { name: 'Guild Noroeste', tasks: ['Cuidado de gallinas', 'Recolección huevos'], workshop: 'Sastrería - Reparaciones', people: 13, alerts: ['Gallinas con bajo rendimiento'] },
-    9: { name: 'Guild Centro-Norte', tasks: ['Limpieza general'], workshop: 'Electrónica - Reparación paneles', people: 7, alerts: [] },
-    10: { name: 'Guild Centro-Sur', tasks: ['Construcción nuevo domo'], workshop: 'Adobe - Ladrillos', people: 18, alerts: ['Necesitamos más manos!', 'Faltan materiales'] },
+    1: { name: 'Guild North', tasks: ['Tomato harvest', 'Irrigation sector A'], workshop: 'Carpentry - Community table', people: 12, alerts: ['We need 2 people for the harvest'] },
+    2: { name: 'Guild Northeast', tasks: ['Greenhouse maintenance'], workshop: 'Blacksmithing - Tools', people: 8, alerts: [] },
+    3: { name: 'Guild East', tasks: ['Fruit tree pruning', 'Composting'], workshop: 'Pottery - Vessels', people: 15, alerts: ['Urgent: Pest detected in apple trees'] },
+    4: { name: 'Guild Southeast', tasks: ['Soil preparation'], workshop: 'Textiles - Blankets', people: 10, alerts: [] },
+    5: { name: 'Guild South', tasks: ['Lettuce planting', 'Carrot harvest'], workshop: 'Bakery - Whole wheat bread', people: 14, alerts: ['Flour needed'] },
+    6: { name: 'Guild Southwest', tasks: ['General irrigation'], workshop: 'Dairy - Fresh cheese', people: 9, alerts: [] },
+    7: { name: 'Guild West', tasks: ['Canal maintenance'], workshop: 'Preserves - Jams', people: 11, alerts: [] },
+    8: { name: 'Guild Northwest', tasks: ['Chicken care', 'Egg collection'], workshop: 'Tailoring - Repairs', people: 13, alerts: ['Hens with low output'] },
+    9: { name: 'Guild Center-North', tasks: ['General cleaning'], workshop: 'Electronics - Panel repair', people: 7, alerts: [] },
+    10: { name: 'Guild Center-South', tasks: ['New dome construction'], workshop: 'Adobe - Bricks', people: 18, alerts: ['We need more hands!', 'Materials missing'] },
   },
   urban: {
-    name: 'Sector Urbano',
-    establishments: ['Clínica', 'Depósito', 'Frigorífico', 'Tesorería', 'Hostel'],
-    alerts: ['Clínica: Stock bajo de medicamentos'],
+    name: 'Urban Sector',
+    establishments: ['Clinic', 'Warehouse', 'Cold Storage', 'Treasury', 'Hostel'],
+    alerts: ['Clinic: Low medication stock'],
   },
 }
 
@@ -88,7 +88,7 @@ export function LowerRight({ onNavigate, onShowInfo, onExpand, expanded }) {
       const guildIndex = 1
       setInfoBubble({ type: 'guild', data: MOCK_SECTOR_DATA.guild[guildIndex], index: guildIndex })
     } else if (destination === 'compound') {
-      onShowInfo?.('Compound: Vista de viviendas')
+      onShowInfo?.('Compound: Housing view')
     }
   }, [onShowInfo])
 
@@ -270,19 +270,19 @@ function InfoBubble({ type, data, index, onClose }) {
         <button className="bubble-close" onClick={onClose}>×</button>
         <h3>🏫 {data.name}</h3>
         <div className="bubble-section">
-          <span className="section-label">Clase actual</span>
+          <span className="section-label">Current class</span>
           <span className="section-value">{data.currentClass}</span>
         </div>
         <div className="bubble-section">
-          <span className="section-label">Docente</span>
+          <span className="section-label">Teacher</span>
           <span className="section-value">{data.teacher}</span>
         </div>
         <div className="bubble-section">
-          <span className="section-label">Estudiantes</span>
+          <span className="section-label">Students</span>
           <span className="section-value">{data.students}</span>
         </div>
         <div className="bubble-section">
-          <span className="section-label">Próxima clase</span>
+          <span className="section-label">Next class</span>
           <span className="section-value">{data.nextClass}</span>
         </div>
         {data.alerts.length > 0 && (
@@ -302,15 +302,15 @@ function InfoBubble({ type, data, index, onClose }) {
         <button className="bubble-close" onClick={onClose}>×</button>
         <h3>🏘️ {data.name}</h3>
         <div className="bubble-section">
-          <span className="section-label">Personas activas</span>
+          <span className="section-label">Active people</span>
           <span className="section-value">{data.people}</span>
         </div>
         <div className="bubble-section">
-          <span className="section-label">Taller</span>
+          <span className="section-label">Workshop</span>
           <span className="section-value">{data.workshop}</span>
         </div>
         <div className="bubble-section tasks-section">
-          <span className="section-label">Tareas en curso</span>
+          <span className="section-label">Tasks in progress</span>
           <ul className="tasks-list">
             {data.tasks.map((task, i) => (
               <li key={i}>{task}</li>

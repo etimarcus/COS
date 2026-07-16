@@ -1,12 +1,12 @@
 /**
- * NarrativeBubble - Narrativa comunitaria parametrizada
+ * NarrativeBubble - Parameterized community narrative
  *
- * Muestra un texto descompuesto en bloques significantes (tokens) con
- * tonalidades por tipo semántico. Cada bloque es clickeable: abre un panel
- * donde se puede dar/quitar relevancia (votar) a las variantes existentes
- * o proponer una nueva. La variante con mayor relevancia es la vigente.
+ * Displays a text decomposed into meaningful blocks (tokens) with
+ * shades by semantic type. Each block is clickable: it opens a panel
+ * where you can add/remove relevance (vote) on the existing variants
+ * or propose a new one. The variant with the most relevance is the current one.
  *
- * Demo: votos y propuestas del usuario se persisten en localStorage.
+ * Demo: the user's votes and proposals are persisted in localStorage.
  */
 
 import { useState, useCallback, useEffect } from 'react'
@@ -39,19 +39,19 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
     } catch { /* storage full or unavailable - demo only */ }
   }, [userData, storageKey])
 
-  // Variantes de un bloque = las de base + las propuestas por el usuario
+  // Variants of a block = the base ones + those proposed by the user
   const getVariants = useCallback((block) => {
     const proposed = userData.proposals[block.id] || []
     return [...block.variants, ...proposed]
   }, [userData.proposals])
 
-  // Relevancia = votos base + voto del usuario (-1, 0, +1)
+  // Relevance = base votes + the user's vote (-1, 0, +1)
   const getScore = useCallback((blockId, variant) => {
     const userVote = userData.votes[blockId]?.[variant.id] || 0
     return variant.votes + userVote
   }, [userData.votes])
 
-  // Variante vigente = la de mayor relevancia
+  // Current variant = the one with the most relevance
   const getActiveVariant = useCallback((block) => {
     const variants = getVariants(block)
     return variants.reduce((best, v) =>
@@ -62,7 +62,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
   const handleVote = useCallback((blockId, variantId, direction) => {
     setUserData(prev => {
       const blockVotes = { ...(prev.votes[blockId] || {}) }
-      // Votar de nuevo en la misma dirección quita el voto (toggle)
+      // Voting again in the same direction removes the vote (toggle)
       blockVotes[variantId] = blockVotes[variantId] === direction ? 0 : direction
       return { ...prev, votes: { ...prev.votes, [blockId]: blockVotes } }
     })
@@ -77,12 +77,12 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
         id: `user-${existing.length + 1}`,
         text,
         votes: 0,
-        author: 'Tú',
+        author: 'You',
       }
       return { ...prev, proposals: { ...prev.proposals, [blockId]: [...existing, newVariant] } }
     })
     setProposalText('')
-    onShowInfo?.('Variante propuesta - ahora puede recibir votos')
+    onShowInfo?.('Variant proposed - it can now receive votes')
   }, [proposalText, onShowInfo])
 
   if (!narrative) return null
@@ -102,7 +102,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
         <span className="narrative-category">{narrative.category}</span>
         <p className="narrative-intro">{narrative.intro}</p>
 
-        {/* Leyenda de tipos semánticos */}
+        {/* Semantic type legend */}
         <div className="narrative-legend">
           {Object.entries(TOKEN_TYPES).map(([key, type]) => (
             <span key={key} className="legend-item" style={{ '--token-color': type.color }}>
@@ -112,7 +112,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
           ))}
         </div>
 
-        {/* Texto tokenizado */}
+        {/* Tokenized text */}
         <div className="narrative-text">
           {narrative.blocks.map((block, i) => {
             if (!block.variants) {
@@ -130,7 +130,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
                   setSelectedBlockId(isSelected ? null : block.id)
                   setProposalText('')
                 }}
-                title={`${TOKEN_TYPES[block.type].label} - ${variantCount} variante${variantCount !== 1 ? 's' : ''}`}
+                title={`${TOKEN_TYPES[block.type].label} - ${variantCount} variant${variantCount !== 1 ? 's' : ''}`}
               >
                 {active.text}
                 {variantCount > 1 && <sup className="token-count">{variantCount}</sup>}
@@ -139,7 +139,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
           })}
         </div>
 
-        {/* Panel de variantes del bloque seleccionado */}
+        {/* Variants panel for the selected block */}
         {selectedBlock && (
           <div className="variants-panel" style={{ '--token-color': TOKEN_TYPES[selectedBlock.type].color }}>
             <div className="variants-header">
@@ -147,7 +147,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
                 <span className="legend-dot" />
                 {TOKEN_TYPES[selectedBlock.type].label}
               </span>
-              <span className="variants-hint">Dale o quitale relevancia a las variantes, o proponé una nueva</span>
+              <span className="variants-hint">Add or remove relevance from the variants, or propose a new one</span>
             </div>
 
             <div className="variants-list">
@@ -163,7 +163,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
                         <button
                           className={`vote-btn up ${userVote === 1 ? 'voted' : ''}`}
                           onClick={() => handleVote(selectedBlock.id, variant.id, 1)}
-                          title="Dar relevancia"
+                          title="Add relevance"
                         >
                           ▲
                         </button>
@@ -171,7 +171,7 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
                         <button
                           className={`vote-btn down ${userVote === -1 ? 'voted' : ''}`}
                           onClick={() => handleVote(selectedBlock.id, variant.id, -1)}
-                          title="Quitar relevancia"
+                          title="Remove relevance"
                         >
                           ▼
                         </button>
@@ -179,8 +179,8 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
                       <div className="variant-body">
                         <span className="variant-text">{variant.text}</span>
                         <span className="variant-meta">
-                          {isActive && <span className="variant-badge">vigente</span>}
-                          propuesta por {variant.author}
+                          {isActive && <span className="variant-badge">current</span>}
+                          proposed by {variant.author}
                         </span>
                       </div>
                     </div>
@@ -194,21 +194,21 @@ export function NarrativeBubble({ narrativeId, onClose, onShowInfo }) {
                 value={proposalText}
                 onChange={(e) => setProposalText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handlePropose(selectedBlock.id) }}
-                placeholder="Proponer una nueva variante para este bloque..."
+                placeholder="Propose a new variant for this block..."
               />
               <button
                 className="btn-propose"
                 onClick={() => handlePropose(selectedBlock.id)}
                 disabled={!proposalText.trim()}
               >
-                Proponer
+                Propose
               </button>
             </div>
           </div>
         )}
 
         <p className="narrative-note">
-          Narrativa viva: el texto se compone con la variante más relevante de cada bloque.
+          Living narrative: the text is composed from the most relevant variant of each block.
         </p>
       </div>
     </div>,
