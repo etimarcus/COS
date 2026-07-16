@@ -73,9 +73,10 @@ const calculateWordPositions = (words) => {
   const placed = []
 
   const getWordDims = (word) => {
-    const charWidth = 2.6
+    const charWidth = 2.0
     const height = 6
-    const textLen = word.text?.length || 5
+    // +1 char reserves room for the has-children "›" indicator
+    const textLen = (word.text?.length || 5) + 1
     return {
       w: Math.max(textLen * charWidth, 8),
       h: height
@@ -123,8 +124,8 @@ const calculateWordPositions = (words) => {
       }
     }
 
-    for (let gy = 15; gy <= 85; gy += 8) {
-      for (let gx = Math.max(10, minX); gx <= Math.min(90, maxX); gx += 8) {
+    for (let gy = 12; gy <= 88; gy += 5) {
+      for (let gx = Math.max(8, minX); gx <= Math.min(92, maxX); gx += 4) {
         const newPos = { x: gx, y: gy, w: dims.w, h: dims.h }
         if (!hasCollision(newPos)) {
           placed.push(newPos)
