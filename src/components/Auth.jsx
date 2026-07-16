@@ -30,9 +30,8 @@ export function Auth() {
     <div className="auth-container">
       <div className="auth-box">
         <div className="auth-header">
-          <div className="auth-logo">C.O.S.</div>
+          <img className="auth-logo-img" src="/cos-logo.png" alt="Civic OS — The People System" />
           <h1>Welcome</h1>
-          <p>Cell Operating System</p>
         </div>
 
         <div className="auth-content">

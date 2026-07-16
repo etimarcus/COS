@@ -35,6 +35,15 @@
   margin-bottom: 1rem;
 }
 
+.auth-logo-img {
+  width: 220px;
+  max-width: 100%;
+  margin: 0 auto 0.75rem;
+  display: block;
+  /* Logo asset has a solid black background — screen blend hides it on the dark box */
+  mix-blend-mode: screen;
+}
+
 .auth-header h1 {
   font-family: 'Cormorant Garamond', serif;
   font-size: 2rem;
